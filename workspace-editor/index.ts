@@ -12,7 +12,7 @@
  * 插件会解析请求的 agent（或默认 agent）的工作区目录，
  * 并将文件访问限制在已知的白名单内
  */
-import type { MoltbotPluginApi } from "clawdbot/plugin-sdk";
+import type { MoltbotPluginApi } from "openclaw/plugin-sdk";
 import {
   listWorkspaceFiles,
   readWorkspaceFile,

@@ -12,7 +12,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as os from "node:os";
 
-import type { MoltbotConfig } from "clawdbot/plugin-sdk";
+import type { MoltbotConfig } from "openclaw/plugin-sdk";
 
 // ───────────────────────────────────────────────────────────────────────────
 // Whitelist of allowed workspace filenames
@@ -30,6 +30,37 @@ const ALLOWED_FILES = new Set([
   "memory.md",     // 记忆文件（小写）
   "AGENTS.md",     // 多 Agent 配置
 ]);
+
+// ───────────────────────────────────────────────────────────────────────────
+// Memory directory support / memory 目录支持
+// ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * Memory directory name
+ * 记忆目录名称
+ */
+const MEMORY_DIR = "memory";
+
+/**
+ * Pattern for memory file names (YYYY-MM-DD.md)
+ * 记忆文件名模式（YYYY-MM-DD.md）
+ */
+const MEMORY_FILE_PATTERN = /^\d{4}-\d{2}-\d{2}\.md$/;
+
+/**
+ * Check if a filename is a valid memory directory file
+ * 检查文件名是否为有效的 memory 目录文件
+ *
+ * @param fileName - Filename to check (e.g., "memory/2026-01-30.md")
+ * @returns true if valid memory file path
+ */
+function isMemoryFilePath(fileName: string): boolean {
+  if (!fileName.startsWith(`${MEMORY_DIR}/`)) {
+    return false;
+  }
+  const baseName = fileName.slice(MEMORY_DIR.length + 1);
+  return MEMORY_FILE_PATTERN.test(baseName);
+}
 
 // ───────────────────────────────────────────────────────────────────────────
 // Type definitions / 类型定义
@@ -150,14 +181,26 @@ function resolveAgentWorkspaceDir(
  * @throws Error if filename is invalid / 如果文件名无效则抛出错误
  */
 function validateFileName(fileName: string): void {
-  // Reject path traversal / 拒绝路径遍历
-  if (fileName.includes("/") || fileName.includes("\\") || fileName === "..") {
+  // Reject path traversal attacks / 拒绝路径遍历攻击
+  if (fileName.includes("\\") || fileName.includes("..")) {
     throw new Error(`Invalid filename: ${fileName}`);
   }
+
+  // Check if it's a memory directory file (memory/YYYY-MM-DD.md)
+  // 检查是否为 memory 目录文件
+  if (isMemoryFilePath(fileName)) {
+    return; // Valid memory file path / 有效的 memory 文件路径
+  }
+
+  // Reject other paths with slashes / 拒绝其他包含斜杠的路径
+  if (fileName.includes("/")) {
+    throw new Error(`Invalid filename: ${fileName}`);
+  }
+
   // Must be in whitelist / 必须在白名单内
   if (!ALLOWED_FILES.has(fileName)) {
     throw new Error(
-      `File not allowed: ${fileName}. Allowed files: ${[...ALLOWED_FILES].join(", ")}`,
+      `File not allowed: ${fileName}. Allowed files: ${[...ALLOWED_FILES].join(", ")}, memory/YYYY-MM-DD.md`,
     );
   }
 }
@@ -213,11 +256,59 @@ export async function listWorkspaceFiles(
     });
   }
 
-  // Sort: existing files first, then alphabetically
-  // 排序：已存在的文件优先，然后按字母顺序
+  // Scan memory/ directory for dated files / 扫描 memory/ 目录获取日期文件
+  const memoryDir = path.join(workspaceDir, MEMORY_DIR);
+  try {
+    const memoryFiles = await fs.readdir(memoryDir);
+    for (const fileName of memoryFiles) {
+      // Only include files matching YYYY-MM-DD.md pattern
+      // 仅包含匹配 YYYY-MM-DD.md 模式的文件
+      if (!MEMORY_FILE_PATTERN.test(fileName)) {
+        continue;
+      }
+
+      const filePath = path.join(memoryDir, fileName);
+      const relativeName = `${MEMORY_DIR}/${fileName}`;
+
+      try {
+        const stat = await fs.stat(filePath);
+        if (stat.isFile()) {
+          files.push({
+            name: relativeName,
+            path: filePath,
+            exists: true,
+            size: stat.size,
+            modifiedAt: stat.mtimeMs,
+          });
+        }
+      } catch {
+        // Skip files that can't be stat'd / 跳过无法获取状态的文件
+      }
+    }
+  } catch {
+    // memory/ directory does not exist - that's fine
+    // memory/ 目录不存在 - 没关系
+  }
+
+  // Sort: existing files first, then by category, then alphabetically
+  // 排序：已存在的文件优先，按类别分组，然后按字母顺序
   files.sort((a, b) => {
     if (a.exists && !b.exists) return -1;
     if (!a.exists && b.exists) return 1;
+
+    // Group memory/ files together at the end
+    // 将 memory/ 文件放在末尾
+    const aIsMemory = a.name.startsWith(`${MEMORY_DIR}/`);
+    const bIsMemory = b.name.startsWith(`${MEMORY_DIR}/`);
+    if (aIsMemory && !bIsMemory) return 1;
+    if (!aIsMemory && bIsMemory) return -1;
+
+    // Within memory files, sort by date descending (newest first)
+    // memory 文件内部按日期倒序排列（最新的在前）
+    if (aIsMemory && bIsMemory) {
+      return b.name.localeCompare(a.name);
+    }
+
     return a.name.localeCompare(b.name);
   });
 
@@ -305,7 +396,10 @@ export async function writeWorkspaceFile(
   const filePath = path.join(workspaceDir, fileName);
 
   // Ensure directory exists / 确保目录存在
-  await fs.mkdir(workspaceDir, { recursive: true });
+  // For memory/ files, also create the memory subdirectory
+  // 对于 memory/ 文件，同时创建 memory 子目录
+  const fileDir = path.dirname(filePath);
+  await fs.mkdir(fileDir, { recursive: true });
 
   // Write file / 写入文件
   await fs.writeFile(filePath, content, "utf-8");

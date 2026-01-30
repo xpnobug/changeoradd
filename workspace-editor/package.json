@@ -1,17 +1,17 @@
 {
-  "name": "@moltbot/workspace-editor",
+  "name": "@openclaw/workspace-editor",
   "version": "0.1.0",
   "type": "module",
   "description": "Gateway RPC methods for reading and writing workspace files (SOUL.md, IDENTITY.md, etc.)",
-  "moltbot": {
+  "openclaw": {
     "extensions": [
       "./index.ts"
     ]
   },
   "peerDependencies": {
-    "moltbot": ">=2026.1.26"
+    "openclaw": ">=2026.1.26"
   },
   "devDependencies": {
-    "moltbot": "workspace:*"
+    "openclaw": "workspace:*"
   }
 }
