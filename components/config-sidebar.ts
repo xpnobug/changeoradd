@@ -18,6 +18,8 @@ const icons = {
   permissions: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg>`,
   // 工作区/文件夹图标 / Workspace/folder icon
   workspace: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+  // 技能图标 (闪电) / Skills icon (zap/lightning)
+  skills: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
 };
 
 // 配置区块定义 / Config sections definition
@@ -57,6 +59,12 @@ export const CONFIG_SECTIONS: ConfigSection[] = [
     label: "权限管理",
     icon: "permissions",
     description: "命令执行和访问权限",
+  },
+  {
+    id: "skills",
+    label: "技能管理",
+    icon: "skills",
+    description: "管理技能白名单和配置",
   },
 ];
 

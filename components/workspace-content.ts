@@ -18,6 +18,13 @@ export type WorkspaceFileInfo = {
   modifiedAt: number | null;
 };
 
+/** Agent 选项 / Agent option */
+export type WorkspaceAgentOption = {
+  id: string;
+  name?: string;
+  default?: boolean;
+};
+
 /** 组件属性 / Component props */
 export type WorkspaceContentProps = {
   /** 文件列表 / File list */
@@ -26,6 +33,8 @@ export type WorkspaceContentProps = {
   workspaceDir: string;
   /** 当前 Agent ID */
   agentId: string;
+  /** 可用的 Agent 列表 / Available agents */
+  agents: WorkspaceAgentOption[];
   /** 当前选中的文件名 / Currently selected file name */
   selectedFile: string | null;
   /** 编辑器内容 / Editor content */
@@ -58,6 +67,8 @@ export type WorkspaceContentProps = {
   onFileCreate: (fileName: string) => void;
   /** 切换文件夹展开状态 / Toggle folder expansion */
   onFolderToggle?: (folderName: string) => void;
+  /** 切换 Agent / Switch agent */
+  onAgentChange?: (agentId: string) => void;
 };
 
 // ─── SVG 图标 / Icons ──────────────────────────────────────────────────────
@@ -566,6 +577,39 @@ function renderMarkdownPreview(content: string) {
 // ─── 主渲染函数 / Main render function ──────────────────────────────────────
 
 /**
+ * 渲染 Agent 选择器
+ * Render agent selector
+ */
+function renderAgentSelector(props: WorkspaceContentProps) {
+  // 如果没有多个 agent 或没有回调，不显示选择器
+  if (!props.agents || props.agents.length <= 1 || !props.onAgentChange) {
+    return nothing;
+  }
+
+  return html`
+    <div class="ws-agent-selector">
+      <label class="ws-agent-selector__label">Agent:</label>
+      <select
+        class="ws-agent-selector__select"
+        .value=${props.agentId}
+        @change=${(e: Event) => {
+          const select = e.target as HTMLSelectElement;
+          props.onAgentChange?.(select.value);
+        }}
+      >
+        ${props.agents.map(
+          (agent) => html`
+            <option value=${agent.id} ?selected=${agent.id === props.agentId}>
+              ${agent.name || agent.id}${agent.default ? " (默认)" : ""}
+            </option>
+          `,
+        )}
+      </select>
+    </div>
+  `;
+}
+
+/**
  * 渲染工作区文件管理内容
  * Render workspace file management content
  */
@@ -578,6 +622,7 @@ export function renderWorkspaceContent(props: WorkspaceContentProps) {
           <h2 class="config-content__title">${LABELS.title}</h2>
           <p class="config-content__desc">${LABELS.desc}</p>
         </div>
+        ${renderAgentSelector(props)}
       </div>
       <div class="ws-layout">
         <!-- 左侧文件列表 / Left file list -->
