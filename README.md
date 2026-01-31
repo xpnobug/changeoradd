@@ -654,3 +654,6 @@ const CHANNEL_METADATA: ChannelMeta[] = [
 6. 内置 Markdown 编辑器
 
 ---
+
+感兴趣可以加群探讨
+![c39d018cc57b95c7a9bc8a61a6e6f956](https://github.com/user-attachments/assets/4b0e6772-fadc-4a5c-a759-96fe006fb118)
