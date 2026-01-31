@@ -1,3 +1,7 @@
+相关修改文件查看
+https://github.com/xpnobug/openclaw/commit/c794590c2ee2096ee3fad57da910e2eee777ee7a
+
+
 项目主要解决 配置繁琐，权限安全问题，提供了可视化配置页面，持续更新。
 
 1. Providers - LLM 提供商和模型管理
