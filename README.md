@@ -1,4 +1,4 @@
-项目主要解决 moltbot（clawdbot） 配置繁琐，权限安全问题，提供了可视化配置页面，持续更新。
+项目主要解决 配置繁琐，权限安全问题，提供了可视化配置页面，持续更新。
 
 1. Providers - LLM 提供商和模型管理
 2. Agent - 代理默认参数和会话模型覆盖
@@ -23,7 +23,7 @@ git stash pop # 恢复本地更改（可能需要手动解决冲突）
 
 
 ```
-changeoradd/
+ui-zh-CN/
 ├── README.md                              # 模块说明文档
 ├── INTEGRATION.md                         # 集成点记录文档
 ├── views/                                 # 视图层

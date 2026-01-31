@@ -5,10 +5,10 @@
  * 处理模型配置页面的数据加载和保存
  * Handles loading and saving of model config page data
  */
-import type { GatewayBrowserClient } from "../../gateway";
-import type { CronJob, CronStatus, CronRunLogEntry, ChannelUiMetaEntry } from "../../types";
-import type { CronFormState } from "../../ui-types";
-import { DEFAULT_CRON_FORM } from "../../app-defaults";
+import type { GatewayBrowserClient } from "../../ui/gateway";
+import type { CronJob, CronStatus, CronRunLogEntry, ChannelUiMetaEntry } from "../../ui/types";
+import type { CronFormState } from "../../ui/ui-types";
+import { DEFAULT_CRON_FORM } from "../../ui/app-defaults";
 import {
   loadCronStatus as loadCronStatusBase,
   loadCronJobs as loadCronJobsBase,
@@ -18,7 +18,7 @@ import {
   removeCronJob as removeCronJobBase,
   loadCronRuns as loadCronRunsBase,
   type CronState,
-} from "../../controllers/cron";
+} from "../../ui/controllers/cron";
 import type {
   ProviderConfig,
   AgentDefaults,

@@ -39,8 +39,8 @@ import type {
   ExecApprovalsTargetNode,
 } from "../controllers/model-config";
 import type { ChannelsConfigData } from "../types/channel-config";
-import type { CronJob, CronStatus, CronRunLogEntry, ChannelUiMetaEntry, GatewayAgentRow } from "../../types";
-import type { CronFormState } from "../../ui-types";
+import type { CronJob, CronStatus, CronRunLogEntry, ChannelUiMetaEntry, GatewayAgentRow } from "../../ui/types";
+import type { CronFormState } from "../../ui/ui-types";
 import type {
   ToolPolicyConfig,
   ToolsConfig,

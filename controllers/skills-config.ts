@@ -5,7 +5,7 @@
  * 处理技能管理页面的数据加载和保存
  * Handles loading and saving of skills management page data
  */
-import type { GatewayBrowserClient } from "../../gateway";
+import type { GatewayBrowserClient } from "../../ui/gateway";
 import type {
   SkillStatusReport,
   SkillsConfig,

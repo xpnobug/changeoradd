@@ -3,16 +3,16 @@
  * Cron scheduled task content component
  */
 import { html, nothing } from "lit";
-import type { CronJob } from "../../types";
-import type { CronFormState } from "../../ui-types";
+import type { CronJob } from "../../ui/types";
+import type { CronFormState } from "../../ui/ui-types";
 import type { CronContentProps } from "../types/cron-config";
-import { formatMs } from "../../format";
+import { formatMs } from "../../ui/format";
 import {
   formatCronPayload,
   formatCronSchedule,
   formatCronState,
   formatNextRun,
-} from "../../presenter";
+} from "../../ui/presenter";
 
 // 中文标签 / Chinese labels
 const LABELS = {
