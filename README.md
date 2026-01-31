@@ -15,17 +15,6 @@ https://github.com/xpnobug/openclaw/commit/c794590c2ee2096ee3fad57da910e2eee777e
 
 ## 一、目录结构
 
-
-因为 moltbot 每天都在更新，不想建分支了，本目录用于存放前端修改，避免与主仓库的文件产生冲突。
-
-更新方式 暂存本地更改，拉取后恢复
-```git
-git stash # 暂存本地更改
-git pull origin main # 拉取远程更新
-git stash pop # 恢复本地更改（可能需要手动解决冲突）
-```
-
-
 ```
 ui-zh-CN/
 ├── README.md                              # 模块说明文档
