@@ -114,15 +114,14 @@ export type WorkspaceFileWriteResult = {
 // ───────────────────────────────────────────────────────────────────────────
 
 /**
- * Get default workspace directory based on profile
- * 根据 profile 获取默认工作区目录
+ * Get default workspace directory
+ * 获取默认工作区目录
+ *
+ * 与核心代码保持一致：~/.openclaw/workspace
+ * Consistent with core code: ~/.openclaw/workspace
  */
 function resolveDefaultWorkspaceDir(): string {
-  const profile = process.env.CLAWDBOT_PROFILE?.trim();
-  if (profile && profile.toLowerCase() !== "default") {
-    return path.join(os.homedir(), `clawd-${profile}`);
-  }
-  return path.join(os.homedir(), "clawd");
+  return path.join(os.homedir(), ".openclaw", "workspace");
 }
 
 /**
@@ -138,34 +137,49 @@ function resolveAgentWorkspaceDir(
   agentId?: string,
 ): { workspaceDir: string; resolvedAgentId: string } {
   const agents = config.agents as
-    | { list?: Array<{ id?: string; workspace?: string; default?: boolean }> }
+    | {
+        list?: Array<{ id?: string; workspace?: string; default?: boolean }>;
+        defaults?: { workspace?: string };
+      }
     | undefined;
   const list = agents?.list ?? [];
 
   // Find the specified agent or the default one
   // 查找指定的 agent 或默认 agent
-  let agent = agentId
+  const agent = agentId
     ? list.find((a) => a.id === agentId)
     : list.find((a) => a.default) ?? list[0];
 
-  if (!agent) {
-    // Fallback to default workspace / 回退到默认工作区
+  // 如果找到 agent 并且有 workspace 配置
+  // If agent found and has workspace config
+  if (agent?.workspace?.trim()) {
+    let workspaceDir = agent.workspace.trim();
+    if (workspaceDir.startsWith("~")) {
+      workspaceDir = path.join(os.homedir(), workspaceDir.slice(1));
+    }
     return {
-      workspaceDir: resolveDefaultWorkspaceDir(),
-      resolvedAgentId: agentId ?? "main",
+      workspaceDir,
+      resolvedAgentId: agent.id ?? "main",
     };
   }
 
-  // Resolve workspace path (may contain ~ for home directory)
-  // 解析工作区路径（可能包含 ~ 表示主目录）
-  let workspaceDir = agent.workspace?.trim() || resolveDefaultWorkspaceDir();
-  if (workspaceDir.startsWith("~")) {
-    workspaceDir = path.join(os.homedir(), workspaceDir.slice(1));
+  // 检查 agents.defaults.workspace（与核心代码一致）
+  // Check agents.defaults.workspace (consistent with core code)
+  const defaultsWorkspace = agents?.defaults?.workspace?.trim();
+  if (defaultsWorkspace) {
+    let workspaceDir = defaultsWorkspace;
+    if (workspaceDir.startsWith("~")) {
+      workspaceDir = path.join(os.homedir(), workspaceDir.slice(1));
+    }
+    return {
+      workspaceDir,
+      resolvedAgentId: agent?.id ?? agentId ?? "main",
+    };
   }
 
   return {
-    workspaceDir,
-    resolvedAgentId: agent.id ?? "main",
+    workspaceDir: resolveDefaultWorkspaceDir(),
+    resolvedAgentId: agent?.id ?? agentId ?? "main",
   };
 }
 
