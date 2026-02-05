@@ -223,9 +223,9 @@ export function renderSkillsContent(props: SkillsContentProps) {
   const stats = calculateStats(skills);
 
   return html`
-    <div class="skills-content">
+    <div class="config-content">
       <!-- 头部 -->
-      <div class="skills-header">
+      <div class="config-content__header">
         <div class="skills-header__info">
           <h3 class="skills-title">技能管理</h3>
           <p class="skills-desc">管理 Agent 可用的技能、白名单和安装配置</p>

@@ -118,6 +118,8 @@ export type WeChatChannelConfig = BaseChannelConfig & {
   robotId?: number;
   defaultAccount?: string;
   requireMention?: boolean;
+  commandAllowFrom?: string[];  // 指令/工具调用白名单
+  safetyPrefix?: string;        // 访客安全前缀
   polling?: WeChatPollingConfig;
   accounts?: Record<string, WeChatChannelConfig>;
 };
@@ -205,7 +207,7 @@ export type ChannelMeta = {
 export type ChannelConfigField = {
   key: string;
   label: string;
-  type: "text" | "password" | "number" | "select" | "toggle" | "array";
+  type: "text" | "password" | "number" | "select" | "toggle" | "array" | "textarea";
   placeholder?: string;
   description?: string;
   options?: Array<{ value: string; label: string }>;

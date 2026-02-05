@@ -612,11 +612,8 @@ function renderAgentSelector(props: WorkspaceContentProps) {
 /**
  * 渲染工作区文件管理内容
  * Render workspace file management content
- */
-export function renderWorkspaceContent(props: WorkspaceContentProps) {
-  return html`
-    <div class="config-content">
-      <div class="config-content__header">
+ * 
+ *       <div class="config-content__header">
         <div class="config-content__icon">${icons.folder}</div>
         <div class="config-content__titles">
           <h2 class="config-content__title">${LABELS.title}</h2>
@@ -624,6 +621,11 @@ export function renderWorkspaceContent(props: WorkspaceContentProps) {
         </div>
         ${renderAgentSelector(props)}
       </div>
+ */
+export function renderWorkspaceContent(props: WorkspaceContentProps) {
+  return html`
+    <div class="config-content">
+
       <div class="ws-layout">
         <!-- 左侧文件列表 / Left file list -->
         ${renderFileList(props)}

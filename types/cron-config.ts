@@ -5,6 +5,8 @@
 import type { CronJob, CronStatus, CronRunLogEntry, ChannelUiMetaEntry, GatewayAgentRow } from "../../ui/types";
 import type { CronFormState } from "../../ui/ui-types";
 
+export type { CronFormState };
+
 /**
  * Cron 内容组件 Props
  */

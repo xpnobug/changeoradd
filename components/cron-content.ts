@@ -4,8 +4,7 @@
  */
 import { html, nothing } from "lit";
 import type { CronJob } from "../../ui/types";
-import type { CronFormState } from "../../ui/ui-types";
-import type { CronContentProps } from "../types/cron-config";
+import type { CronContentProps, CronFormState } from "../types/cron-config";
 import { formatMs } from "../../ui/format";
 import {
   formatCronPayload,
@@ -159,11 +158,10 @@ const DEFAULT_FORM: CronFormState = {
   wakeMode: "next-heartbeat",
   payloadKind: "systemEvent",
   payloadText: "",
-  deliver: false,
-  channel: "last",
-  to: "",
+  deliveryMode: "none",
+  deliveryChannel: "last",
+  deliveryTo: "",
   timeoutSeconds: "",
-  postToMainPrefix: "",
 };
 
 // 空函数，用于回调默认值
@@ -196,7 +194,7 @@ function buildChannelOptions(props: CronContentProps): string[] {
   const channels = props.channels ?? [];
   const options = ["last", ...channels.filter(Boolean)];
   const form = props.form ?? DEFAULT_FORM;
-  const current = form.channel?.trim();
+  const current = form.deliveryChannel?.trim();
   if (current && !options.includes(current)) {
     options.push(current);
   }
@@ -541,9 +539,9 @@ function renderCreateModal(props: CronContentProps) {
                       <div class="mc-toggle">
                         <input
                           type="checkbox"
-                          .checked=${form.deliver}
+                          ?checked=${form.deliveryMode === "announce"}
                           @change=${(e: Event) =>
-                            onFormChange({ deliver: (e.target as HTMLInputElement).checked })}
+                            onFormChange({ deliveryMode: (e.target as HTMLInputElement).checked ? "announce" : "none" })}
                         />
                         <span class="mc-toggle__track"></span>
                       </div>
@@ -553,15 +551,14 @@ function renderCreateModal(props: CronContentProps) {
                     <label class="mc-field__label">${LABELS.channel}</label>
                     <select
                       class="mc-select"
-                      .value=${form.channel || "last"}
                       @change=${(e: Event) =>
                         onFormChange({
-                          channel: (e.target as HTMLSelectElement).value,
+                          deliveryChannel: (e.target as HTMLSelectElement).value,
                         })}
                     >
                       ${channelOptions.map(
                         (channel) =>
-                          html`<option value=${channel}>${resolveChannelLabel(props, channel)}</option>`,
+                          html`<option value=${channel} ?selected=${(form.deliveryChannel || "last") === channel}>${resolveChannelLabel(props, channel)}</option>`,
                       )}
                     </select>
                   </div>
@@ -574,9 +571,9 @@ function renderCreateModal(props: CronContentProps) {
                       type="text"
                       class="mc-input"
                       placeholder=${LABELS.toPlaceholder}
-                      .value=${form.to}
+                      .value=${form.deliveryTo}
                       @input=${(e: Event) =>
-                        onFormChange({ to: (e.target as HTMLInputElement).value })}
+                        onFormChange({ deliveryTo: (e.target as HTMLInputElement).value })}
                     />
                   </div>
                   <div class="mc-field">
@@ -591,22 +588,6 @@ function renderCreateModal(props: CronContentProps) {
                     />
                   </div>
                 </div>
-
-                ${form.sessionTarget === "isolated"
-                  ? html`
-                      <div class="mc-field" style="margin-bottom: 16px;">
-                        <label class="mc-field__label">${LABELS.postToMainPrefix}</label>
-                        <input
-                          type="text"
-                          class="mc-input"
-                          placeholder=${LABELS.postToMainPrefixPlaceholder}
-                          .value=${form.postToMainPrefix}
-                          @input=${(e: Event) =>
-                            onFormChange({ postToMainPrefix: (e.target as HTMLInputElement).value })}
-                        />
-                      </div>
-                    `
-                  : nothing}
               `
             : nothing}
 

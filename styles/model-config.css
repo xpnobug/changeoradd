@@ -8,9 +8,7 @@
   flex-direction: column;
   gap: 0;
   height: calc(100vh - 160px);
-  margin: -16px;
   border-radius: var(--radius-xl);
-  overflow: hidden;
   border: 1px solid var(--border);
   background: var(--panel);
 }
@@ -20,157 +18,22 @@
   flex-direction: row;
 }
 
+/* Full Layout - 全宽布局 (agents-config) */
+.mc-layout--full {
+  flex-direction: column;
+}
+
+.mc-layout--full > * {
+  flex: 1;
+  min-height: 0;
+}
+
 .mc-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-}
-
-/* ===========================================
-   Config Sidebar - 配置侧边栏
-   =========================================== */
-
-.config-sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-accent);
-  border-right: 1px solid var(--border);
-}
-
-:root[data-theme="light"] .config-sidebar {
-  background: var(--bg-hover);
-}
-
-.config-sidebar__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.config-sidebar__title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.config-sidebar__badge {
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  background: var(--accent-subtle);
-  border: 1px solid rgba(255, 77, 77, 0.3);
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.config-sidebar__nav {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-}
-
-.config-sidebar__item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 6px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-lg);
-  background: transparent;
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    background var(--duration-fast) ease,
-    border-color var(--duration-fast) ease;
-}
-
-.config-sidebar__item:hover {
-  background: var(--bg-hover);
-  border-color: var(--border);
-}
-
-.config-sidebar__item--active {
-  background: var(--bg-elevated);
-  border-color: var(--accent);
-  box-shadow: var(--shadow-sm);
-}
-
-:root[data-theme="light"] .config-sidebar__item--active {
-  background: white;
-}
-
-.config-sidebar__item-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--muted);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.config-sidebar__item--active .config-sidebar__item-icon {
-  color: var(--accent);
-}
-
-.config-sidebar__item-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.config-sidebar__item-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.config-sidebar__item-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 2px;
-}
-
-.config-sidebar__item-desc {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.config-sidebar__footer {
-  padding: 16px 20px;
-  border-top: 1px solid var(--border);
-}
-
-.config-sidebar__status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.config-sidebar__status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--danger);
-}
-
-.config-sidebar__status-dot--ok {
-  background: var(--ok);
-}
-
-.config-sidebar__status-text {
-  font-size: 12px;
-  color: var(--muted);
 }
 
 /* ===========================================
@@ -285,6 +148,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 10px;
 }
 
 .mc-section__header {
@@ -588,9 +452,9 @@
   font-size: 14px;
   outline: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease,
-          background var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background var(--duration-fast) ease;
 }
 
 .mc-input::placeholder {
@@ -630,9 +494,9 @@
   line-height: 1.5;
   width: 100%;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease,
-          background var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background var(--duration-fast) ease;
 }
 
 .mc-textarea::placeholder {
@@ -674,8 +538,8 @@
   outline: none;
   appearance: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .mc-select:focus {
@@ -722,8 +586,8 @@
   border-radius: var(--radius-full);
   position: relative;
   transition:
-          background var(--duration-normal) ease,
-          border-color var(--duration-normal) ease;
+    background var(--duration-normal) ease,
+    border-color var(--duration-normal) ease;
   cursor: pointer;
 }
 
@@ -742,8 +606,8 @@
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   transition:
-          transform var(--duration-normal) var(--ease-out),
-          background var(--duration-normal) ease;
+    transform var(--duration-normal) var(--ease-out),
+    background var(--duration-normal) ease;
 }
 
 .mc-toggle input:checked + .mc-toggle__track {
@@ -1058,8 +922,8 @@
   font-weight: 500;
   cursor: pointer;
   transition:
-          background var(--duration-fast) ease,
-          border-color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 .mc-btn:hover:not(:disabled) {
@@ -1122,8 +986,8 @@
   color: var(--muted);
   cursor: pointer;
   transition:
-          background var(--duration-fast) ease,
-          color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
 .mc-icon-btn svg {
@@ -1162,19 +1026,6 @@
    =========================================== */
 
 @media (max-width: 992px) {
-  /* Sidebar becomes collapsible on medium screens */
-  .config-sidebar {
-    width: 220px;
-  }
-
-  .config-sidebar__item {
-    padding: 12px 14px;
-  }
-
-  .config-sidebar__item-desc {
-    display: none;
-  }
-
   .config-content__header {
     padding: 16px 20px;
   }
@@ -1189,52 +1040,6 @@
   /* Stack sidebar on top on mobile */
   .mc-layout--sidebar {
     flex-direction: column;
-  }
-
-  .config-sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    max-height: none;
-  }
-
-  .config-sidebar__header {
-    padding: 14px 16px;
-  }
-
-  .config-sidebar__nav {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 6px;
-    padding: 10px 12px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .config-sidebar__nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .config-sidebar__item {
-    flex: 0 0 auto;
-    width: auto;
-    min-width: auto;
-    margin-bottom: 0;
-    padding: 10px 14px;
-    justify-content: center;
-  }
-
-  .config-sidebar__item-icon {
-    margin-top: 0;
-  }
-
-  .config-sidebar__item-content {
-    display: none;
-  }
-
-  .config-sidebar__footer {
-    display: none;
   }
 
   .mc-main {
@@ -1321,15 +1126,6 @@
     padding: 16px;
   }
 
-  .config-sidebar__item {
-    padding: 8px 12px;
-    min-width: 80px;
-  }
-
-  .config-sidebar__item-icon {
-    width: 18px;
-    height: 18px;
-  }
 }
 
 /* ===========================================
@@ -1341,32 +1137,6 @@
   .mc-layout {
     margin: -8px;
     border-radius: var(--radius-md);
-  }
-
-  /* 侧边栏导航 - 更紧凑的图标网格 */
-  .config-sidebar__header {
-    padding: 12px 14px;
-  }
-
-  .config-sidebar__title {
-    font-size: 13px;
-  }
-
-  .config-sidebar__nav {
-    padding: 8px;
-    gap: 4px;
-  }
-
-  .config-sidebar__item {
-    padding: 6px 8px;
-    width: auto;
-    min-width: 44px;
-    flex: 0 0 auto;
-  }
-
-  .config-sidebar__item-icon {
-    width: 20px;
-    height: 20px;
   }
 
   /* 操作栏 - 垂直堆叠 */
@@ -2039,8 +1809,8 @@
   font-weight: 500;
   cursor: pointer;
   transition:
-          background var(--duration-fast) ease,
-          border-color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 :root[data-theme="light"] .permissions-tab {
@@ -2128,8 +1898,8 @@
   outline: none;
   appearance: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .permissions-select:focus {
@@ -2175,9 +1945,9 @@
   font-family: var(--font-mono);
   outline: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease,
-          background var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background var(--duration-fast) ease;
 }
 
 .permissions-input::placeholder {
@@ -2381,8 +2151,8 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   transition:
-          background var(--duration-fast) ease,
-          border-color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 :root[data-theme="light"] .permissions-radio {
@@ -2419,8 +2189,8 @@
   border-radius: 50%;
   flex-shrink: 0;
   transition:
-          border-color var(--duration-fast) ease,
-          background var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    background var(--duration-fast) ease;
 }
 
 .permissions-radio:has(input:checked) .permissions-radio__mark {
@@ -3199,8 +2969,8 @@
   text-align: left;
   cursor: pointer;
   transition:
-          background var(--duration-fast) ease,
-          border-color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 .ws-file-item:hover {
@@ -3360,8 +3130,8 @@
   color: var(--muted);
   cursor: pointer;
   transition:
-          background var(--duration-fast) ease,
-          color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
 .ws-editor__mode-btn:hover {
@@ -3539,8 +3309,8 @@
   text-align: left;
   cursor: pointer;
   transition:
-          background var(--duration-fast) ease,
-          border-color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 :root[data-theme="light"] .ws-folder-item {
@@ -3774,8 +3544,8 @@
   outline: none;
   cursor: pointer;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .skills-select:focus {
@@ -3814,8 +3584,8 @@
   font-size: 13px;
   outline: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .skills-filter__input::placeholder {
@@ -4014,8 +3784,8 @@
   font-size: 12px;
   color: var(--accent);
   transition:
-          background var(--duration-fast) ease,
-          border-color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 .skills-allowlist-toggle input:checked + .skills-allowlist-toggle__icon {
@@ -4075,8 +3845,8 @@
   font-family: var(--font-mono);
   outline: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .skills-apikey__input::placeholder {
@@ -4353,8 +4123,8 @@
   font-family: var(--font-mono);
   outline: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .skills-env-row__input::placeholder {
@@ -4473,8 +4243,8 @@
   resize: vertical;
   outline: none;
   transition:
-          border-color var(--duration-fast) ease,
-          box-shadow var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .skills-extra-dirs__textarea::placeholder {
@@ -4822,8 +4592,8 @@
   font-size: 12px;
   text-decoration: none;
   transition:
-          background var(--duration-fast) ease,
-          border-color var(--duration-fast) ease;
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 :root[data-theme="light"] .skills-docs-preview__link {

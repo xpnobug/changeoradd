@@ -25,7 +25,6 @@ import type {
   GatewayConfig,
   ModelConfig,
 } from "../views/model-config";
-import type { ConfigSectionId } from "../types/config-sections";
 import type { ChannelsConfigData } from "../types/channel-config";
 import type { ProviderFormState } from "../components/providers-content";
 import type {
@@ -114,6 +113,7 @@ export type AgentIdentityEntry = {
   default?: boolean;
   workspace?: string;
   identity?: AgentIdentityConfig;
+  model?: string | { primary?: string; fallbacks?: string[] };
 };
 
 export type ModelConfigState = {
@@ -138,8 +138,6 @@ export type ModelConfigState = {
   // 完整配置快照（用于保存）
   modelConfigFullSnapshot: Record<string, unknown> | null;
   modelConfigHash: string | null;
-  // 当前选中的配置区块
-  modelConfigActiveSection: ConfigSectionId;
   // 通道配置
   modelConfigChannelsConfig: ChannelsConfigData | null;
   modelConfigSelectedChannel: string | null;
@@ -203,6 +201,116 @@ export type ModelConfigState = {
   addProviderForm: ProviderFormState;
   addProviderError: string | null;
 };
+
+/**
+ * 创建初始 ModelConfigState
+ * Create initial ModelConfigState
+ */
+export function createInitialModelConfigState(): ModelConfigState {
+  return {
+    client: null,
+    connected: false,
+    lastError: null,
+
+    // 模型配置数据
+    modelConfigLoading: false,
+    modelConfigSaving: false,
+    modelConfigApplying: false,
+    modelConfigProviders: {},
+    modelConfigAgentDefaults: {},
+    modelConfigGateway: {},
+    modelConfigExpandedProviders: new Set(),
+    modelConfigOriginal: null,
+    modelConfigFullSnapshot: null,
+    modelConfigHash: null,
+    modelConfigChannelsConfig: null,
+    modelConfigSelectedChannel: null,
+
+    // 会话管理状态
+    agentSessionsLoading: false,
+    agentSessionsResult: null,
+    agentSessionsError: null,
+
+    // 权限管理状态
+    permissionsLoading: false,
+    permissionsSaving: false,
+    permissionsDirty: false,
+    execApprovalsSnapshot: null,
+    execApprovalsForm: null,
+    permissionsSelectedAgent: null,
+    permissionsActiveTab: "exec",
+
+    // 工具权限状态
+    toolsConfig: null,
+    toolsConfigOriginal: null,
+    agentToolsConfigs: [],
+    agentToolsConfigsOriginal: [],
+    toolsSelectedAgent: null,
+    toolsExpanded: true,
+
+    // Agent 身份配置状态
+    modelConfigAgentsList: [],
+    modelConfigAgentsListOriginal: [],
+    modelConfigSelectedAgentId: null,
+
+    // 工作区文件状态
+    workspaceFiles: [],
+    workspaceDir: "",
+    workspaceAgentId: "",
+    workspaceSelectedFile: null,
+    workspaceEditorContent: "",
+    workspaceOriginalContent: "",
+    workspaceLoading: false,
+    workspaceSaving: false,
+    workspaceError: null,
+    workspaceEditorMode: "edit",
+
+    // 定时任务状态
+    cronLoading: false,
+    cronBusy: false,
+    cronError: null,
+    cronStatus: null,
+    cronJobs: [],
+    cronForm: {
+      name: "",
+      description: "",
+      agentId: "",
+      enabled: true,
+      scheduleKind: "every",
+      scheduleAt: "",
+      everyAmount: "30",
+      everyUnit: "minutes",
+      cronExpr: "0 7 * * *",
+      cronTz: "",
+      payloadKind: "systemEvent",
+      payloadText: "",
+      deliver: false,
+      channel: "last",
+      to: "",
+      timeoutSeconds: "",
+      postToMainPrefix: "",
+      sessionTarget: "last",
+      wakeMode: "wake",
+    },
+    cronChannels: [],
+    cronChannelLabels: {},
+    cronChannelMeta: [],
+    cronRunsJobId: null,
+    cronRuns: [],
+    cronExpandedJobId: null,
+    cronDeleteConfirmJobId: null,
+
+    // 添加供应商弹窗状态
+    addProviderModalShow: false,
+    addProviderForm: {
+      key: "",
+      baseUrl: "",
+      apiKey: "",
+      api: "openai-completions",
+    },
+    addProviderError: null,
+  };
+}
 
 /**
  * 从配置快照中提取模型供应商数据
@@ -360,6 +468,7 @@ function extractAgentsList(config: Record<string, unknown>): AgentIdentityEntry[
             emoji: identity.emoji as string | undefined,
             avatar: identity.avatar as string | undefined,
           } : undefined,
+          model: entry.model as string | { primary?: string; fallbacks?: string[] } | undefined,
         };
       });
   }
@@ -415,7 +524,16 @@ export function hasModelConfigChanges(state: ModelConfigState): boolean {
 
   const originalJson = JSON.stringify(state.modelConfigOriginal);
 
-  return currentJson !== originalJson;
+  if (currentJson !== originalJson) return true;
+
+  // 检查 Agent 模型配置是否有更改
+  if (state.modelConfigAgentsList && state.modelConfigAgentsListOriginal) {
+    const agentsJson = JSON.stringify(state.modelConfigAgentsList);
+    const agentsOriginalJson = JSON.stringify(state.modelConfigAgentsListOriginal);
+    if (agentsJson !== agentsOriginalJson) return true;
+  }
+
+  return false;
 }
 
 /**
@@ -714,6 +832,13 @@ export async function saveModelConfig(state: ModelConfigState): Promise<void> {
 export async function applyModelConfig(state: ModelConfigState): Promise<void> {
   if (!state.client || !state.connected) return;
 
+  // 防止重复调用
+  if (state.modelConfigApplying) {
+    console.warn("[applyModelConfig] 已在应用中，跳过重复调用");
+    return;
+  }
+
+  console.log("[applyModelConfig] 开始应用配置");
   state.modelConfigApplying = true;
   state.lastError = null;
 
@@ -738,18 +863,24 @@ export async function applyModelConfig(state: ModelConfigState): Promise<void> {
         // 主配置保存失败
         console.warn("主配置保存失败");
       } else {
+        console.log("[applyModelConfig] 调用 config.apply");
         await state.client.request("config.apply", {
           raw,
           baseHash: state.modelConfigHash,
+          // 立即触发重启，避免与配置文件监听器的重启冲突
+          // 配置文件监听器会在检测到文件变化后也触发重启
+          // 如果延迟触发，会导致两次重启
+          restartDelayMs: 0,
         });
+        console.log("[applyModelConfig] config.apply 完成，Gateway 将重启");
+        // config.apply 会触发 Gateway 重启，不需要手动重新加载配置
+        // Gateway 重启后 UI 会自动重连并重新加载数据
+        // 这里直接返回，避免在重启过程中执行额外操作
+        return;
       }
     }
 
-    // 重新加载配置以获取最新状态
-    if (mainConfigChanged) {
-      await loadModelConfig(state);
-    }
-    // 重新加载权限配置
+    // 只有在没有主配置更改时才重新加载权限配置
     if (state.execApprovalsSnapshot) {
       await loadPermissions(state);
     }
@@ -1089,6 +1220,124 @@ export function updateGatewayConfig(
 }
 
 /**
+ * 更新 Agent 的主模型配置
+ * Update agent's primary model config
+ */
+export function updateAgentModel(
+  state: ModelConfigState,
+  agentId: string,
+  modelId: string | null,
+): void {
+  if (!state.modelConfigFullSnapshot) {
+    console.warn("[updateAgentModel] modelConfigFullSnapshot 为空");
+    return;
+  }
+
+  // 深度复制配置
+  const config = JSON.parse(JSON.stringify(state.modelConfigFullSnapshot)) as Record<string, unknown>;
+  const agents = (config.agents ?? {}) as Record<string, unknown>;
+  const list = (agents.list ?? []) as Array<Record<string, unknown>>;
+
+  // 查找目标 agent
+  const agentIndex = list.findIndex((a) => a.id === agentId);
+  if (agentIndex === -1) {
+    console.warn("[updateAgentModel] 未找到 agent:", agentId);
+    return;
+  }
+
+  const agent = list[agentIndex];
+
+  if (!modelId) {
+    // 清除模型配置，使用默认值
+    delete agent.model;
+  } else {
+    // 保留 fallbacks 如果有的话
+    const existing = agent.model;
+    if (existing && typeof existing === "object" && !Array.isArray(existing)) {
+      const record = existing as Record<string, unknown>;
+      const fallbacks = record.fallbacks;
+      if (Array.isArray(fallbacks) && fallbacks.length > 0) {
+        agent.model = { primary: modelId, fallbacks };
+      } else {
+        agent.model = modelId;
+      }
+    } else {
+      agent.model = modelId;
+    }
+  }
+
+  // 更新配置快照（触发 UI 重新渲染）
+  state.modelConfigFullSnapshot = config;
+
+  // 同步更新 modelConfigAgentsList 以便正确检测变更
+  state.modelConfigAgentsList = list.map((a) => ({
+    id: a.id as string,
+    name: a.name as string | undefined,
+    default: a.default as boolean | undefined,
+    workspace: a.workspace as string | undefined,
+    identity: a.identity as AgentIdentityConfig | undefined,
+    model: a.model as string | { primary?: string; fallbacks?: string[] } | undefined,
+  }));
+
+  console.log("[updateAgentModel] 已更新 agent", agentId, "模型为", modelId);
+}
+
+/**
+ * 更新 Agent 的备选模型配置
+ * Update agent's fallback models config
+ */
+export function updateAgentModelFallbacks(
+  state: ModelConfigState,
+  agentId: string,
+  fallbacks: string[],
+): void {
+  if (!state.modelConfigFullSnapshot) return;
+
+  // 深度复制配置
+  const config = JSON.parse(JSON.stringify(state.modelConfigFullSnapshot)) as Record<string, unknown>;
+  const agents = (config.agents ?? {}) as Record<string, unknown>;
+  const list = (agents.list ?? []) as Array<Record<string, unknown>>;
+
+  // 查找目标 agent
+  const agentIndex = list.findIndex((a) => a.id === agentId);
+  if (agentIndex === -1) return;
+
+  const agent = list[agentIndex];
+
+  // 获取当前主模型
+  const existing = agent.model;
+  let primary: string | null = null;
+
+  if (typeof existing === "string") {
+    primary = existing.trim() || null;
+  } else if (existing && typeof existing === "object" && !Array.isArray(existing)) {
+    const record = existing as Record<string, unknown>;
+    if (typeof record.primary === "string") {
+      primary = record.primary.trim() || null;
+    }
+  }
+
+  if (fallbacks.length === 0) {
+    // 没有备选模型，使用简单字符串或清除
+    if (primary) {
+      agent.model = primary;
+    } else {
+      delete agent.model;
+    }
+  } else {
+    // 有备选模型，使用对象格式
+    if (primary) {
+      agent.model = { primary, fallbacks };
+    } else {
+      agent.model = { fallbacks };
+    }
+  }
+
+  // 更新配置快照
+  state.modelConfigFullSnapshot = config;
+}
+
+/**
  * 选择要编辑身份的 Agent
  */
 export function selectAgentForIdentity(
@@ -1129,26 +1378,6 @@ export function updateAgentIdentity(
 
   list[index] = agent;
   state.modelConfigAgentsList = list;
-}
-
-/**
- * 切换配置区块
- */
-export function setActiveSection(
-  state: ModelConfigState,
-  sectionId: string,
-): void {
-  state.modelConfigActiveSection = sectionId as ConfigSectionId;
-
-  // 切换到权限管理时自动加载权限数据
-  if (sectionId === "permissions" && !state.execApprovalsSnapshot && !state.permissionsLoading) {
-    void loadPermissions(state);
-  }
-
-  // 切换到 Agent 设置时自动加载会话列表
-  if (sectionId === "agent" && !state.agentSessionsResult && !state.agentSessionsLoading) {
-    void loadAgentSessions(state);
-  }
 }
 
 // ============================================
@@ -1699,8 +1928,10 @@ export function removeAgentToolsDenyEntry(
 
 /**
  * 加载会话列表
+ * @param state 状态对象
+ * @param agentId 可选的 Agent ID，用于过滤会话
  */
-export async function loadAgentSessions(state: ModelConfigState): Promise<void> {
+export async function loadAgentSessions(state: ModelConfigState, agentId?: string): Promise<void> {
   if (!state.client || !state.connected) return;
   if (state.agentSessionsLoading) return;
 
@@ -1708,11 +1939,18 @@ export async function loadAgentSessions(state: ModelConfigState): Promise<void> 
   state.agentSessionsError = null;
 
   try {
-    const res = (await state.client.request("sessions.list", {
+    const params: Record<string, unknown> = {
       limit: 50,
       includeGlobal: false,
       includeUnknown: false,
-    })) as SessionsListResult | undefined;
+    };
+
+    // 如果指定了 agentId，添加过滤条件
+    if (agentId) {
+      params.agentId = agentId;
+    }
+
+    const res = (await state.client.request("sessions.list", params)) as SessionsListResult | undefined;
 
     if (res) {
       state.agentSessionsResult = res;
@@ -1725,25 +1963,27 @@ export async function loadAgentSessions(state: ModelConfigState): Promise<void> 
 }
 
 /**
- * 更新会话模型 (per-session model override)
+ * 更新会话模型 - 通过 sessions.patch API 直接修改
+ * Update session model via sessions.patch API
  */
 export async function patchSessionModel(
   state: ModelConfigState,
   sessionKey: string,
   model: string | null,
+  agentId?: string,
 ): Promise<void> {
   if (!state.client || !state.connected) return;
 
-  const params: Record<string, unknown> = { key: sessionKey };
-  // 只有当 model 不是 undefined 时才添加到参数中
-  params.model = model;
-
   try {
-    await state.client.request("sessions.patch", params);
-    // 重新加载会话列表 / Reload session list
-    await loadAgentSessions(state);
+    // 使用 sessions.patch API 直接修改模型
+    await state.client.request("sessions.patch", {
+      key: sessionKey,
+      model: model || null,  // null 表示清除模型覆盖，使用默认值
+    });
+    // 刷新会话列表
+    await loadAgentSessions(state, agentId);
   } catch (err) {
-    state.agentSessionsError = `更新会话模型失败: ${String(err)}`;
+    state.agentSessionsError = `切换模型失败: ${String(err)}`;
   }
 }
 

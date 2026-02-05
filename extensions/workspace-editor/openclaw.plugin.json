@@ -1,0 +1,11 @@
+{
+  "id": "workspace-editor",
+  "name": "Workspace Editor",
+  "description": "Gateway RPC methods for reading and writing workspace files (SOUL.md, IDENTITY.md, etc.)",
+  "version": "0.1.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
