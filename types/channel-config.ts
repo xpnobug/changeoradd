@@ -193,6 +193,112 @@ export type TlonChannelConfig = BaseChannelConfig & {
   autoDiscoverChannels?: boolean;
 };
 
+// 飞书 Markdown 配置
+export type FeishuMarkdownConfig = {
+  mode?: "native" | "escape" | "strip";
+  tableMode?: "native" | "ascii" | "simple";
+};
+
+// 飞书流式消息合并配置
+export type FeishuBlockStreamingCoalesceConfig = {
+  enabled?: boolean;
+  minDelayMs?: number;
+  maxDelayMs?: number;
+};
+
+// 飞书心跳可见性配置
+export type FeishuHeartbeatConfig = {
+  visibility?: "visible" | "hidden";
+  intervalMs?: number;
+};
+
+// 飞书工具配置
+export type FeishuToolsConfig = {
+  doc?: boolean;      // 文档操作
+  wiki?: boolean;     // 知识库操作
+  drive?: boolean;    // 云盘操作
+  perm?: boolean;     // 权限管理
+  scopes?: boolean;   // 应用权限诊断
+};
+
+// 飞书群组配置
+export type FeishuGroupConfig = {
+  requireMention?: boolean;
+  tools?: {
+    allow?: string[];
+    deny?: string[];
+  };
+  skills?: string[];
+  enabled?: boolean;
+  allowFrom?: Array<string | number>;
+  systemPrompt?: string;
+};
+
+// 飞书 DM 配置
+export type FeishuDmConfig = {
+  enabled?: boolean;
+  systemPrompt?: string;
+};
+
+// 飞书账户配置
+export type FeishuAccountConfig = {
+  enabled?: boolean;
+  name?: string;
+  appId?: string;
+  appSecret?: string;
+  encryptKey?: string;
+  verificationToken?: string;
+  domain?: "feishu" | "lark" | string;
+  connectionMode?: "websocket" | "webhook";
+  webhookPath?: string;
+  webhookPort?: number;
+  capabilities?: string[];
+  markdown?: FeishuMarkdownConfig;
+  configWrites?: boolean;
+  dmPolicy?: "open" | "pairing" | "allowlist";
+  allowFrom?: Array<string | number>;
+  groupPolicy?: "open" | "allowlist" | "disabled";
+  groupAllowFrom?: Array<string | number>;
+  requireMention?: boolean;
+  groups?: Record<string, FeishuGroupConfig | undefined>;
+  historyLimit?: number;
+  dmHistoryLimit?: number;
+  dms?: Record<string, FeishuDmConfig | undefined>;
+  textChunkLimit?: number;
+  chunkMode?: "length" | "newline";
+  blockStreamingCoalesce?: FeishuBlockStreamingCoalesceConfig;
+  mediaMaxMb?: number;
+  heartbeat?: FeishuHeartbeatConfig;
+  renderMode?: "auto" | "raw" | "card";
+  tools?: FeishuToolsConfig;
+};
+
+// 飞书配置
+export type FeishuChannelConfig = BaseChannelConfig & {
+  // 顶层凭证（向后兼容单账户模式）
+  appId?: string;
+  appSecret?: string;
+  encryptKey?: string;
+  verificationToken?: string;
+  domain?: "feishu" | "lark" | string;
+  connectionMode?: "websocket" | "webhook";
+  webhookPath?: string;
+  webhookPort?: number;
+  capabilities?: string[];
+  markdown?: FeishuMarkdownConfig;
+  configWrites?: boolean;
+  requireMention?: boolean;
+  groups?: Record<string, FeishuGroupConfig | undefined>;
+  dms?: Record<string, FeishuDmConfig | undefined>;
+  chunkMode?: "length" | "newline";
+  blockStreamingCoalesce?: FeishuBlockStreamingCoalesceConfig;
+  heartbeat?: FeishuHeartbeatConfig;
+  renderMode?: "auto" | "raw" | "card";
+  tools?: FeishuToolsConfig;
+  // 多账户配置
+  accounts?: Record<string, FeishuAccountConfig | undefined>;
+};
+
 // 通道元数据
 export type ChannelMeta = {
   id: string;
@@ -230,6 +336,7 @@ export type ChannelsConfigData = {
   imessage?: IMessageChannelConfig;
   msteams?: MSTeamsChannelConfig;
   // 扩展通道
+  feishu?: FeishuChannelConfig;
   wechat?: WeChatChannelConfig;
   matrix?: MatrixChannelConfig;
   mattermost?: MattermostChannelConfig;

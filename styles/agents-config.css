@@ -154,6 +154,31 @@
   color: var(--accent);
   font-size: 11px;
   font-weight: 600;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.agents-sidebar__set-default {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.agents-sidebar__item:hover .agents-sidebar__set-default {
+  opacity: 1;
+}
+
+.agents-sidebar__set-default:hover {
+  background: var(--primary-subtle);
+  color: var(--primary);
 }
 
 .agents-sidebar__list {
@@ -213,6 +238,11 @@
 }
 
 .agents-sidebar__item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.agents-sidebar__item-content {
   flex: 1;
   min-width: 0;
 }
@@ -1257,170 +1287,25 @@
 }
 
 /* ===========================================
-   Mobile Responsiveness - 移动端适配
+   Card Actions - 卡片操作按钮
    =========================================== */
 
-@media (max-width: 992px) {
-  .agents-sidebar {
-    width: 240px;
-  }
-
-  .agents-sidebar__item-info {
-    display: none;
-  }
-
-  .agents-sidebar__item-avatar {
-    margin: 0 auto;
-  }
-
-  .mc-grid--3col {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.mc-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .agents-layout {
-    flex-direction: column;
-    margin: -12px;
-    border-radius: var(--radius-lg);
-  }
-
-  .agents-sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .agents-sidebar__list {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding: 10px 12px;
-    gap: 6px;
-  }
-
-  .agents-sidebar__item {
-    flex: 0 0 auto;
-    padding: 8px 12px;
-    margin-bottom: 0;
-  }
-
-  .agents-sidebar__item-avatar {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
-
-  .agents-sidebar__item-info {
-    display: block;
-  }
-
-  .agents-sidebar__item-id {
-    display: none;
-  }
-
-  .agents-sidebar__footer {
-    display: none;
-  }
-
-  .agent-header {
-    flex-wrap: wrap;
-    padding: 16px;
-  }
-
-  .agent-header__avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-
-  .agent-header__name {
-    font-size: 16px;
-  }
-
-  .agent-header__meta {
-    width: 100%;
-    justify-content: flex-start;
-    margin-top: 8px;
-  }
-
-  .agent-tabs {
-    padding: 10px 16px;
-  }
-
-  .agent-tabs__item {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .agents-detail__content {
-    padding: 16px;
-  }
-
-  .mc-grid--2col,
-  .mc-grid--3col {
-    grid-template-columns: 1fr;
-  }
-
-  .files-layout {
-    flex-direction: column;
-  }
-
-  .files-sidebar {
-    width: 100%;
-    max-height: 200px;
-  }
-
-  .skills-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .cron-item {
-    flex-direction: column;
-  }
-
-  .cron-item__actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
+/* 会话管理卡片头部对齐 */
+.sessions-list ~ .mc-card__header,
+.mc-card:has(.sessions-list) .mc-card__header,
+.mc-card .mc-card__header:has(+ .mc-card__content .sessions-list) {
+  align-items: center;
 }
 
-@media (max-width: 480px) {
-  .agents-sidebar__item {
-    padding: 6px 10px;
-  }
-
-  .agents-sidebar__item-avatar {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-  }
-
-  .agent-header {
-    padding: 12px;
-  }
-
-  .agent-header__avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-  }
-
-  .agent-tabs__item {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .agents-detail__content {
-    padding: 12px;
-  }
-
-  .mc-section__header {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .mc-card__content {
-    padding: 14px;
-  }
+/* 简化：直接让所有带 actions 的卡片头部居中对齐 */
+.mc-card__header:has(.mc-card__actions) {
+  align-items: center;
 }

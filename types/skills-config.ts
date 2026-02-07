@@ -208,6 +208,21 @@ export type SkillDeleteState = {
   error: string | null;             // 错误信息 / Error message
 };
 
+// ─── 技能文件预览状态 / Skill file preview state ─────────────────────────────────
+
+/**
+ * 技能文件预览状态（只读查看）
+ * Skill file preview state (read-only view)
+ */
+export type SkillPreviewState = {
+  open: boolean;                    // 预览是否打开 / Whether preview is open
+  skillKey: string | null;          // 技能键 / Skill key
+  skillName: string | null;         // 技能名称 / Skill name
+  content: string;                  // 文件内容 / File content
+  loading: boolean;                 // 加载中 / Loading
+  error: string | null;             // 错误信息 / Error message
+};
+
 // ─── 组件属性 / Component props ───────────────────────────────────────────────
 
 export type SkillsContentProps = {
@@ -262,6 +277,7 @@ export type SkillsContentProps = {
   editorState: SkillEditorState;
   createState: SkillCreateState;
   deleteState: SkillDeleteState;
+  previewState: SkillPreviewState;
 
   // 编辑器回调 / Editor callbacks
   onEditorOpen: (skillKey: string, skillName: string, source: EditableSkillSource) => void;
@@ -281,4 +297,8 @@ export type SkillsContentProps = {
   onDeleteOpen: (skillKey: string, skillName: string, source: EditableSkillSource) => void;
   onDeleteClose: () => void;
   onDeleteConfirm: () => void;
+
+  // 文件预览回调 / File preview callbacks
+  onPreviewOpen: (skillKey: string, skillName: string) => void;
+  onPreviewClose: () => void;
 };

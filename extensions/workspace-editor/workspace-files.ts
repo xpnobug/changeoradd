@@ -15,6 +15,29 @@ import * as os from "node:os";
 import type { MoltbotConfig } from "openclaw/plugin-sdk";
 
 // ───────────────────────────────────────────────────────────────────────────
+// 动态加载配置 / Dynamic config loading
+// ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * 动态加载配置文件
+ * Dynamically load config file
+ *
+ * 直接读取配置文件以获取最新的 agent 列表
+ * Directly read config file to get latest agent list
+ */
+async function loadFreshConfig(): Promise<MoltbotConfig> {
+  const configPath = path.join(os.homedir(), ".openclaw", "openclaw.json");
+  try {
+    const content = await fs.readFile(configPath, "utf-8");
+    return JSON.parse(content) as MoltbotConfig;
+  } catch {
+    // 如果读取失败，返回空配置
+    // Return empty config if read fails
+    return {} as MoltbotConfig;
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
 // Whitelist of allowed workspace filenames
 // 允许访问的工作区文件白名单
 // ───────────────────────────────────────────────────────────────────────────
@@ -230,16 +253,19 @@ function validateFileName(fileName: string): void {
  * Returns information about each file, including whether it exists.
  * 返回每个文件的信息，包括是否存在。
  *
- * @param config - Moltbot configuration / Moltbot 配置
+ * @param _config - Moltbot configuration (ignored, uses dynamic loadConfig) / Moltbot 配置（忽略，使用动态 loadConfig）
  * @param agentId - Optional agent ID / 可选的 agent ID
  * @returns List result with files / 包含文件的列表结果
  */
 export async function listWorkspaceFiles(
-  config: MoltbotConfig,
+  _config: MoltbotConfig,
   agentId?: string,
 ): Promise<WorkspaceFilesListResult> {
+  // 动态加载配置以获取最新的 agent 列表
+  // Dynamically load config to get latest agent list
+  const freshConfig = await loadFreshConfig();
   const { workspaceDir, resolvedAgentId } = resolveAgentWorkspaceDir(
-    config,
+    freshConfig,
     agentId,
   );
 
@@ -341,20 +367,23 @@ export async function listWorkspaceFiles(
  * Read content of a workspace file
  * 读取工作区文件内容
  *
- * @param config - Moltbot configuration / Moltbot 配置
+ * @param _config - Moltbot configuration (ignored, uses dynamic loadConfig) / Moltbot 配置（忽略，使用动态 loadConfig）
  * @param fileName - Name of file to read / 要读取的文件名
  * @param agentId - Optional agent ID / 可选的 agent ID
  * @returns Read result with content / 包含内容的读取结果
  */
 export async function readWorkspaceFile(
-  config: MoltbotConfig,
+  _config: MoltbotConfig,
   fileName: string,
   agentId?: string,
 ): Promise<WorkspaceFileReadResult> {
   // Validate filename against whitelist / 验证文件名是否在白名单内
   validateFileName(fileName);
 
-  const { workspaceDir } = resolveAgentWorkspaceDir(config, agentId);
+  // 动态加载配置以获取最新的 agent 列表
+  // Dynamically load config to get latest agent list
+  const freshConfig = await loadFreshConfig();
+  const { workspaceDir } = resolveAgentWorkspaceDir(freshConfig, agentId);
   const filePath = path.join(workspaceDir, fileName);
 
   let exists = false;
@@ -391,14 +420,14 @@ export async function readWorkspaceFile(
  * Creates the file if it doesn't exist, or overwrites if it does.
  * 如果文件不存在则创建，如果存在则覆盖。
  *
- * @param config - Moltbot configuration / Moltbot 配置
+ * @param _config - Moltbot configuration (ignored, uses dynamic loadConfig) / Moltbot 配置（忽略，使用动态 loadConfig）
  * @param fileName - Name of file to write / 要写入的文件名
  * @param content - Content to write / 要写入的内容
  * @param agentId - Optional agent ID / 可选的 agent ID
  * @returns Write result / 写入结果
  */
 export async function writeWorkspaceFile(
-  config: MoltbotConfig,
+  _config: MoltbotConfig,
   fileName: string,
   content: string,
   agentId?: string,
@@ -406,7 +435,10 @@ export async function writeWorkspaceFile(
   // Validate filename against whitelist / 验证文件名是否在白名单内
   validateFileName(fileName);
 
-  const { workspaceDir } = resolveAgentWorkspaceDir(config, agentId);
+  // 动态加载配置以获取最新的 agent 列表
+  // Dynamically load config to get latest agent list
+  const freshConfig = await loadFreshConfig();
+  const { workspaceDir } = resolveAgentWorkspaceDir(freshConfig, agentId);
   const filePath = path.join(workspaceDir, fileName);
 
   // Ensure directory exists / 确保目录存在

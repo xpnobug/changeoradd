@@ -99,6 +99,7 @@ export const LABELS = {
     applying: "应用中...",
     loading: "加载中...",
     retry: "重试",
+    setDefault: "设为默认",
   },
 
   // 状态标签 / Status labels

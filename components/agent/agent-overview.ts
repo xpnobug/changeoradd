@@ -16,6 +16,7 @@ import { LABELS, type ConfigSnapshot } from "../../types/agents-config";
 
 const icons = {
   refresh: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
+  trash: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,10 +29,21 @@ const SESSION_LABELS = {
   sessionKey: "会话",
   sessionModel: "模型",
   sessionUpdated: "最后更新",
+  sessionActions: "操作",
   inheritDefault: "继承默认",
   noSessions: "暂无会话",
   loading: "加载中...",
   refresh: "刷新",
+  create: "新建会话",
+  createTitle: "新建会话",
+  sessionNameLabel: "会话名称",
+  sessionNamePlaceholder: "输入会话名称",
+  sessionModelLabel: "模型（可选）",
+  cancel: "取消",
+  confirm: "创建",
+  creating: "创建中...",
+  delete: "删除",
+  deleteTitle: "删除会话",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -61,6 +73,16 @@ export type AgentOverviewProps = {
   onSessionsRefresh: () => void;
   onSessionModelChange: (sessionKey: string, model: string | null) => void;
   onSessionNavigate: (sessionKey: string) => void;
+  onSessionDelete?: (sessionKey: string) => void;
+  // 新建会话 / Create session
+  sessionCreateShow?: boolean;
+  sessionCreateName?: string;
+  sessionCreateModel?: string | null;
+  sessionCreating?: boolean;
+  onSessionCreateShow?: (show: boolean) => void;
+  onSessionCreateNameChange?: (name: string) => void;
+  onSessionCreateModelChange?: (model: string | null) => void;
+  onSessionCreate?: () => void;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -81,14 +103,30 @@ function resolveAgentConfig(config: Record<string, unknown> | null, agentId: str
 /**
  * 解析工作区路径
  * Resolve workspace path
+ *
+ * 优先级：配置中的 workspace > 文件列表中的 workspace > 默认 workspace
+ * Priority: config workspace > files list workspace > default workspace
  */
 function resolveWorkspace(
   config: { entry?: { workspace?: string }; defaults?: { workspace?: string } },
   agentFilesList: AgentsFilesListResult | null,
   agentId: string,
 ): string {
-  const workspaceFromFiles = agentFilesList && agentFilesList.agentId === agentId ? agentFilesList.workspace : null;
-  return workspaceFromFiles || config.entry?.workspace || config.defaults?.workspace || "default";
+  // 优先使用配置中的 workspace（更可靠）
+  // Prefer workspace from config (more reliable)
+  if (config.entry?.workspace) {
+    return config.entry.workspace;
+  }
+
+  // 其次使用文件列表中的 workspace（如果 agentId 匹配）
+  // Then use workspace from files list (if agentId matches)
+  if (agentFilesList && agentFilesList.agentId === agentId && agentFilesList.workspace) {
+    return agentFilesList.workspace;
+  }
+
+  // 最后使用默认 workspace
+  // Finally use default workspace
+  return config.defaults?.workspace || "default";
 }
 
 /**
@@ -276,6 +314,7 @@ function renderSessionRow(
   defaultModel: { provider: string | null; model: string | null },
   onModelChange: (sessionKey: string, model: string | null) => void,
   onNavigate: (sessionKey: string) => void,
+  onDelete?: (sessionKey: string) => void,
 ) {
   const displayName = session.displayName ?? session.label ?? session.key;
   const currentModel = session.model
@@ -317,6 +356,119 @@ function renderSessionRow(
       <div class="session-row__updated">
         ${session.updatedAt ? formatAgo(session.updatedAt) : "-"}
       </div>
+      <div class="session-row__actions">
+        <button
+          class="mc-btn mc-btn--sm mc-btn--icon mc-btn--danger"
+          title=${SESSION_LABELS.deleteTitle}
+          @click=${() => onDelete?.(session.key)}
+        >
+          ${icons.trash}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * 渲染新建会话模态框
+ * Render create session modal
+ */
+function renderCreateSessionModal(props: AgentOverviewProps) {
+  const {
+    sessionCreateShow,
+    sessionCreateName,
+    sessionCreateModel,
+    sessionCreating,
+    availableModels,
+    onSessionCreateShow,
+    onSessionCreateNameChange,
+    onSessionCreateModelChange,
+    onSessionCreate,
+  } = props;
+
+  if (!sessionCreateShow) return nothing;
+
+  const handleClose = () => onSessionCreateShow?.(false);
+  const handleNameChange = (e: Event) => {
+    onSessionCreateNameChange?.((e.target as HTMLInputElement).value);
+  };
+  const handleModelChange = (e: Event) => {
+    const value = (e.target as HTMLSelectElement).value;
+    onSessionCreateModelChange?.(value || null);
+  };
+  const handleCreate = () => onSessionCreate?.();
+
+  const canCreate = (sessionCreateName?.trim().length ?? 0) > 0 && !sessionCreating;
+
+  return html`
+    <div class="skills-modal-overlay" @click=${handleClose}>
+      <div class="skills-modal skills-create-modal" @click=${(e: Event) => e.stopPropagation()}>
+        <!-- 弹窗头部 -->
+        <div class="skills-modal__header">
+          <div class="skills-modal__title">
+            <span class="skills-modal__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            </span>
+            ${SESSION_LABELS.createTitle}
+          </div>
+          <button class="skills-modal__close" @click=${handleClose}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 弹窗内容 -->
+        <div class="skills-modal__body">
+          <div class="skills-create__field">
+            <label class="skills-create__label">${SESSION_LABELS.sessionNameLabel}</label>
+            <input
+              type="text"
+              class="skills-create__input"
+              .value=${sessionCreateName ?? ""}
+              placeholder=${SESSION_LABELS.sessionNamePlaceholder}
+              ?disabled=${sessionCreating}
+              @input=${handleNameChange}
+            />
+            <div class="skills-create__hint">会话名称将用于标识此会话</div>
+          </div>
+
+          <div class="skills-create__field">
+            <label class="skills-create__label">${SESSION_LABELS.sessionModelLabel}</label>
+            <select
+              class="skills-create__input"
+              .value=${sessionCreateModel ?? ""}
+              ?disabled=${sessionCreating}
+              @change=${handleModelChange}
+            >
+              <option value="">${SESSION_LABELS.inheritDefault}</option>
+              ${availableModels.map(
+                (m) => html`<option value=${m.id} ?selected=${m.id === sessionCreateModel}>${m.name} (${m.provider})</option>`,
+              )}
+            </select>
+            <div class="skills-create__hint">留空则使用 Agent 默认模型</div>
+          </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="skills-modal__footer">
+          <button class="mc-btn" @click=${handleClose} ?disabled=${sessionCreating}>
+            ${SESSION_LABELS.cancel}
+          </button>
+          <button
+            class="mc-btn primary"
+            ?disabled=${!canCreate}
+            @click=${handleCreate}
+          >
+            ${sessionCreating ? SESSION_LABELS.creating : SESSION_LABELS.confirm}
+          </button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -334,25 +486,39 @@ function renderSessionsSection(props: AgentOverviewProps) {
     onSessionsRefresh,
     onSessionModelChange,
     onSessionNavigate,
+    onSessionDelete,
+    onSessionCreateShow,
   } = props;
 
   const sessions = sessionsResult?.sessions ?? [];
   const sessionsDefaults = sessionsResult?.defaults ?? { modelProvider: null, model: null };
   const defaults = { provider: sessionsDefaults.modelProvider, model: sessionsDefaults.model };
 
+  const handleCreateClick = () => onSessionCreateShow?.(true);
+
   return html`
     <div class="mc-card" style="margin-top: 16px;">
       <div class="mc-card__header">
         <h4 class="mc-card__title">${SESSION_LABELS.title}</h4>
-        <button
-          class="mc-btn mc-btn--sm"
-          ?disabled=${sessionsLoading}
-          @click=${onSessionsRefresh}
-          title=${SESSION_LABELS.refresh}
-        >
-          ${icons.refresh}
-          ${sessionsLoading ? SESSION_LABELS.loading : SESSION_LABELS.refresh}
-        </button>
+        <div class="mc-card__actions">
+          <button
+            class="mc-btn mc-btn--sm mc-btn--primary"
+            ?disabled=${sessionsLoading}
+            @click=${handleCreateClick}
+            title=${SESSION_LABELS.create}
+          >
+            + ${SESSION_LABELS.create}
+          </button>
+          <button
+            class="mc-btn mc-btn--sm"
+            ?disabled=${sessionsLoading}
+            @click=${onSessionsRefresh}
+            title=${SESSION_LABELS.refresh}
+          >
+            ${icons.refresh}
+            ${sessionsLoading ? SESSION_LABELS.loading : SESSION_LABELS.refresh}
+          </button>
+        </div>
       </div>
       <div class="mc-card__content">
         ${sessionsError
@@ -366,10 +532,11 @@ function renderSessionsSection(props: AgentOverviewProps) {
                   <div class="sessions-list__col sessions-list__col--key">${SESSION_LABELS.sessionKey}</div>
                   <div class="sessions-list__col sessions-list__col--model">${SESSION_LABELS.sessionModel}</div>
                   <div class="sessions-list__col sessions-list__col--updated">${SESSION_LABELS.sessionUpdated}</div>
+                  <div class="sessions-list__col sessions-list__col--actions">${SESSION_LABELS.sessionActions}</div>
                 </div>
                 <div class="sessions-list__body">
                   ${sessions.map((session) =>
-                    renderSessionRow(session, availableModels, defaults, onSessionModelChange, onSessionNavigate),
+                    renderSessionRow(session, availableModels, defaults, onSessionModelChange, onSessionNavigate, onSessionDelete),
                   )}
                 </div>
               `
@@ -377,6 +544,9 @@ function renderSessionsSection(props: AgentOverviewProps) {
         </div>
       </div>
     </div>
+
+    <!-- 新建会话模态框 / Create session modal -->
+    ${renderCreateSessionModal(props)}
   `;
 }
 

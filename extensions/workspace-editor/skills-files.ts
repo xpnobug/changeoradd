@@ -34,7 +34,7 @@ const SKILL_NAME_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/;
  * 可编辑的技能来源
  * Editable skill sources
  */
-export type SkillSource = "managed" | "workspace";
+export type SkillSource = "managed" | "workspace" | "bundled";
 
 // ───────────────────────────────────────────────────────────────────────────
 // 类型定义 / Type definitions
@@ -248,10 +248,25 @@ function validateSkillName(skillName: string): void {
  * @param source - 技能来源 / Skill source
  * @throws 如果来源不可编辑则抛出错误 / Throws error if source is not editable
  */
-function validateSource(source: string): asserts source is SkillSource {
+function validateEditableSource(source: string): asserts source is "managed" | "workspace" {
   if (source !== "managed" && source !== "workspace") {
     throw new Error(
       `不支持的技能来源: ${source}。仅支持 "managed" 和 "workspace"`,
+    );
+  }
+}
+
+/**
+ * 验证技能来源是否有效（包括 bundled）
+ * Validate skill source is valid (including bundled)
+ *
+ * @param source - 技能来源 / Skill source
+ * @throws 如果来源无效则抛出错误 / Throws error if source is invalid
+ */
+function validateSource(source: string): asserts source is SkillSource {
+  if (source !== "managed" && source !== "workspace" && source !== "bundled") {
+    throw new Error(
+      `不支持的技能来源: ${source}。仅支持 "managed"、"workspace" 和 "bundled"`,
     );
   }
 }
@@ -380,6 +395,7 @@ export async function listSkillFiles(
  * @param skillName - 技能名称 / Skill name
  * @param source - 技能来源 / Skill source
  * @param agentId - 可选的 Agent ID / Optional agent ID
+ * @param filePath - 可选的文件路径（用于 bundled 技能）/ Optional file path (for bundled skills)
  * @returns 读取结果 / Read result
  */
 export async function readSkillFile(
@@ -387,20 +403,31 @@ export async function readSkillFile(
   skillName: string,
   source: string,
   agentId?: string,
+  filePath?: string,
 ): Promise<SkillFileReadResult> {
   // 验证参数 / Validate parameters
   validateSkillName(skillName);
   validateSource(source);
 
-  const { managedDir, workspaceDir } = resolveSkillDirs(config, agentId);
-  const baseDir = source === "managed" ? managedDir : workspaceDir;
-  const filePath = path.join(baseDir, skillName, SKILL_FILE_NAME);
+  let targetPath: string;
+
+  if (source === "bundled") {
+    // bundled 技能需要提供 filePath / bundled skills require filePath
+    if (!filePath) {
+      throw new Error("bundled 技能需要提供 filePath 参数");
+    }
+    targetPath = filePath;
+  } else {
+    const { managedDir, workspaceDir } = resolveSkillDirs(config, agentId);
+    const baseDir = source === "managed" ? managedDir : workspaceDir;
+    targetPath = path.join(baseDir, skillName, SKILL_FILE_NAME);
+  }
 
   let exists = false;
   let content = "";
 
   try {
-    content = await fs.readFile(filePath, "utf-8");
+    content = await fs.readFile(targetPath, "utf-8");
     exists = true;
   } catch (err) {
     const anyErr = err as { code?: string };
@@ -413,8 +440,8 @@ export async function readSkillFile(
 
   return {
     name: skillName,
-    path: filePath,
-    source,
+    path: targetPath,
+    source: source as SkillSource,
     exists,
     content,
   };
@@ -444,7 +471,7 @@ export async function writeSkillFile(
 ): Promise<SkillFileWriteResult> {
   // 验证参数 / Validate parameters
   validateSkillName(skillName);
-  validateSource(source);
+  validateEditableSource(source);
 
   const { managedDir, workspaceDir } = resolveSkillDirs(config, agentId);
   const baseDir = source === "managed" ? managedDir : workspaceDir;
@@ -519,7 +546,7 @@ export async function createSkill(
 ): Promise<SkillFileCreateResult> {
   // 验证参数 / Validate parameters
   validateSkillName(skillName);
-  validateSource(source);
+  validateEditableSource(source);
 
   const { managedDir, workspaceDir } = resolveSkillDirs(config, agentId);
   const baseDir = source === "managed" ? managedDir : workspaceDir;
@@ -579,7 +606,7 @@ export async function deleteSkill(
 ): Promise<SkillFileDeleteResult> {
   // 验证参数 / Validate parameters
   validateSkillName(skillName);
-  validateSource(source);
+  validateEditableSource(source);
 
   const { managedDir, workspaceDir } = resolveSkillDirs(config, agentId);
   const baseDir = source === "managed" ? managedDir : workspaceDir;

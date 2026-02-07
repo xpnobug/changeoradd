@@ -51,6 +51,8 @@ export type WorkspaceContentProps = {
   editorMode: "edit" | "preview" | "split";
   /** 展开的文件夹集合 / Set of expanded folders */
   expandedFolders?: Set<string>;
+  /** 移动端视图模式：list=列表, editor=编辑器 / Mobile view mode */
+  mobileView?: "list" | "editor";
 
   // 回调函数 / Callbacks
   /** 选择文件 / Select file */
@@ -69,6 +71,8 @@ export type WorkspaceContentProps = {
   onFolderToggle?: (folderName: string) => void;
   /** 切换 Agent / Switch agent */
   onAgentChange?: (agentId: string) => void;
+  /** 移动端返回列表 / Mobile back to list */
+  onMobileBack?: () => void;
 };
 
 // ─── SVG 图标 / Icons ──────────────────────────────────────────────────────
@@ -94,6 +98,8 @@ const icons = {
   chevronRight: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
   // 收起箭头 / Chevron down (expanded)
   chevronDown: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
+  // 返回箭头 / Back arrow
+  arrowLeft: html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`,
 };
 
 // ─── 中文标签 / Labels ──────────────────────────────────────────────────────
@@ -119,6 +125,7 @@ const LABELS = {
   size: "大小",
   modified: "修改时间",
   workspaceDir: "工作区目录",
+  back: "返回",
 };
 
 // ─── 文件描述映射 / File description map ────────────────────────────────────
@@ -612,7 +619,7 @@ function renderAgentSelector(props: WorkspaceContentProps) {
 /**
  * 渲染工作区文件管理内容
  * Render workspace file management content
- * 
+ *
  *       <div class="config-content__header">
         <div class="config-content__icon">${icons.folder}</div>
         <div class="config-content__titles">
@@ -623,14 +630,27 @@ function renderAgentSelector(props: WorkspaceContentProps) {
       </div>
  */
 export function renderWorkspaceContent(props: WorkspaceContentProps) {
+  // 移动端视图模式 / Mobile view mode
+  const mobileView = props.mobileView ?? "list";
+  const showMobileEditor = mobileView === "editor" && props.selectedFile;
+
   return html`
     <div class="config-content">
-
-      <div class="ws-layout">
+      <div class="ws-layout ${showMobileEditor ? "ws-layout--mobile-editor" : ""}">
         <!-- 左侧文件列表 / Left file list -->
-        ${renderFileList(props)}
+        <div class="ws-file-list-wrapper ${showMobileEditor ? "ws-file-list-wrapper--hidden" : ""}">
+          ${renderFileList(props)}
+        </div>
         <!-- 右侧编辑器 / Right editor -->
-        <div class="ws-editor">
+        <div class="ws-editor ${showMobileEditor ? "ws-editor--mobile-active" : ""}">
+          ${showMobileEditor && props.onMobileBack
+            ? html`
+                <button class="ws-editor__back-btn" @click=${props.onMobileBack}>
+                  ${icons.arrowLeft}
+                  <span>${LABELS.back}</span>
+                </button>
+              `
+            : nothing}
           ${props.loading
             ? html`<div class="ws-editor__loading">${LABELS.loading}</div>`
             : renderEditor(props)}

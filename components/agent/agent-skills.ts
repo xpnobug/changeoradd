@@ -18,6 +18,7 @@ import type {
   SkillEditorState,
   SkillCreateState,
   SkillDeleteState,
+  SkillPreviewState,
   EditableSkillSource,
   SkillEditorMode,
 } from "../../types/skills-config";
@@ -70,6 +71,7 @@ export type AgentSkillsProps = {
   editorState: SkillEditorState;
   createState: SkillCreateState;
   deleteState: SkillDeleteState;
+  previewState: SkillPreviewState;
 
   // 回调函数 / Callbacks
   onRefresh: () => void;
@@ -105,6 +107,8 @@ export type AgentSkillsProps = {
   onDeleteOpen: (skillKey: string, skillName: string, source: EditableSkillSource) => void;
   onDeleteClose: () => void;
   onDeleteConfirm: () => void;
+  onPreviewOpen: (skillKey: string, skillName: string) => void;
+  onPreviewClose: () => void;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -141,6 +145,7 @@ export function renderAgentSkills(props: AgentSkillsProps) {
     editorState,
     createState,
     deleteState,
+    previewState,
     onRefresh,
     onSave,
     onFilterChange,
@@ -172,6 +177,8 @@ export function renderAgentSkills(props: AgentSkillsProps) {
     onDeleteOpen,
     onDeleteClose,
     onDeleteConfirm,
+    onPreviewOpen,
+    onPreviewClose,
   } = props;
 
   // 构建 SkillsContentProps
@@ -196,6 +203,7 @@ export function renderAgentSkills(props: AgentSkillsProps) {
     editorState,
     createState,
     deleteState,
+    previewState,
     onRefresh,
     onSave,
     onFilterChange,
@@ -227,6 +235,8 @@ export function renderAgentSkills(props: AgentSkillsProps) {
     onDeleteOpen,
     onDeleteClose,
     onDeleteConfirm,
+    onPreviewOpen,
+    onPreviewClose,
   };
 
   // 使用 skills-content 布局渲染

@@ -35,6 +35,9 @@ export type AgentFilesProps = {
   editorMode?: "edit" | "preview" | "split";
   expandedFolders?: Set<string>;
 
+  // 移动端视图模式 / Mobile view mode
+  mobileView?: "list" | "editor";
+
   // 回调函数 / Callbacks
   onLoadFiles: (agentId: string) => void;
   onSelectFile: (name: string) => void;
@@ -44,6 +47,7 @@ export type AgentFilesProps = {
   onModeChange?: (mode: "edit" | "preview" | "split") => void;
   onFolderToggle?: (folderName: string) => void;
   onFileCreate?: (fileName: string) => void;
+  onMobileBack?: () => void;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -90,6 +94,7 @@ export function renderAgentFiles(props: AgentFilesProps) {
     agentFileSaving,
     editorMode = "edit",
     expandedFolders = new Set<string>(),
+    mobileView = "list",
     onLoadFiles,
     onSelectFile,
     onFileDraftChange,
@@ -98,22 +103,26 @@ export function renderAgentFiles(props: AgentFilesProps) {
     onModeChange,
     onFolderToggle,
     onFileCreate,
+    onMobileBack,
   } = props;
 
   // 检查是否需要加载文件列表 / Check if need to load files list
   const needsLoad = !agentFilesList || agentFilesList.agentId !== agentId;
 
-  // 如果需要加载且未在加载中，显示加载提示
-  // If needs load and not loading, show load prompt
+  // 如果需要加载且未在加载中，自动触发加载
+  // If needs load and not loading, auto-trigger load
   if (needsLoad && !agentFilesLoading && !agentFilesError) {
+    // 使用 setTimeout 避免在渲染期间触发状态更新
+    // Use setTimeout to avoid triggering state update during render
+    setTimeout(() => onLoadFiles(agentId), 0);
+
+    // 显示加载中状态
     return html`
       <div class="mc-section">
         <div class="mc-card">
           <div class="mc-card__content mc-card__content--center">
-            <p>点击加载按钮获取 Agent 工作区文件</p>
-            <button class="mc-btn mc-btn--primary" @click=${() => onLoadFiles(agentId)}>
-              加载文件
-            </button>
+            <p>正在加载 Agent 工作区文件...</p>
+            <div class="mc-loading-spinner"></div>
           </div>
         </div>
       </div>
@@ -142,6 +151,7 @@ export function renderAgentFiles(props: AgentFilesProps) {
     error: agentFilesError,
     editorMode,
     expandedFolders,
+    mobileView,
 
     // 回调映射 / Callback mappings
     onFileSelect: onSelectFile,
@@ -159,6 +169,7 @@ export function renderAgentFiles(props: AgentFilesProps) {
     onModeChange: onModeChange ?? (() => {}),
     onFileCreate: onFileCreate ?? (() => {}),
     onFolderToggle,
+    onMobileBack,
     // 不显示 Agent 选择器（因为已经在 Agent 详情页内）
     // Don't show agent selector (already in agent details page)
     onAgentChange: undefined,

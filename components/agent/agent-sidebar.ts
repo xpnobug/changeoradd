@@ -43,6 +43,7 @@ export type AgentSidebarProps = {
   onSelectAgent: (agentId: string) => void;
   onRefresh: () => void;
   onGlobalConfigClick?: (section: string) => void;
+  onSetDefault?: (agentId: string) => void;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -108,11 +109,17 @@ function renderAgentRow(props: {
   isSelected: boolean;
   identity: AgentIdentityResult | null;
   onSelect: () => void;
+  onSetDefault?: (agentId: string) => void;
 }) {
-  const { agent, defaultId, isSelected, identity, onSelect } = props;
+  const { agent, defaultId, isSelected, identity, onSelect, onSetDefault } = props;
   const isDefault = defaultId && agent.id === defaultId;
   const emoji = resolveAgentEmoji(agent, identity);
   const displayName = agent.name?.trim() || identity?.name?.trim() || agent.id;
+
+  const handleSetDefault = (e: Event) => {
+    e.stopPropagation();
+    onSetDefault?.(agent.id);
+  };
 
   return html`
     <button
@@ -127,7 +134,15 @@ function renderAgentRow(props: {
         <span class="agents-sidebar__item-name">${displayName}</span>
         <span class="agents-sidebar__item-id">${agent.id}</span>
       </span>
-      ${isDefault ? html`<span class="agents-sidebar__badge">${LABELS.status.default}</span>` : nothing}
+      ${isDefault
+        ? html`<span class="agents-sidebar__badge">${LABELS.status.default}</span>`
+        : onSetDefault
+          ? html`<span
+              class="agents-sidebar__set-default"
+              @click=${handleSetDefault}
+              title=${LABELS.actions.setDefault}
+            >${LABELS.actions.setDefault}</span>`
+          : nothing}
     </button>
   `;
 }
@@ -211,6 +226,7 @@ export function renderAgentSidebar(props: AgentSidebarProps) {
                 isSelected: props.selectedId === agent.id,
                 identity: props.agentIdentityById[agent.id] ?? null,
                 onSelect: () => props.onSelectAgent(agent.id),
+                onSetDefault: props.onSetDefault,
               }),
             )}
       </div>

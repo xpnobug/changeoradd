@@ -184,10 +184,20 @@ const plugin = {
         // 验证必需的 source 参数 / Validate required source parameter
         const source =
           typeof params.source === "string" ? params.source.trim() : "";
-        if (!source || (source !== "managed" && source !== "workspace")) {
+        if (!source || (source !== "managed" && source !== "workspace" && source !== "bundled")) {
           respond(false, undefined, {
             code: "INVALID_REQUEST",
-            message: 'source is required and must be "managed" or "workspace"',
+            message: 'source is required and must be "managed", "workspace" or "bundled"',
+          });
+          return;
+        }
+        // bundled 技能需要 filePath 参数 / bundled skills require filePath parameter
+        const filePath =
+          typeof params.filePath === "string" ? params.filePath.trim() : undefined;
+        if (source === "bundled" && !filePath) {
+          respond(false, undefined, {
+            code: "INVALID_REQUEST",
+            message: 'filePath is required for bundled skills',
           });
           return;
         }
@@ -202,6 +212,7 @@ const plugin = {
             skillName,
             source,
             agentId,
+            filePath,
           );
           respond(true, result, undefined);
         } catch (err) {
