@@ -78,6 +78,9 @@ export {
   updateAgentIdentity,
   setDefaultAgent,
   extractAgentsList,
+  duplicateAgent,
+  exportAgent,
+  deleteAgent,
 } from "./agents";
 
 // ============================================

@@ -1,0 +1,563 @@
+/**
+ * 向导组件样式
+ */
+
+/* 向导容器 */
+.wizard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+}
+
+.wizard__header {
+  padding: 20px 24px 0;
+}
+
+.wizard__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 步骤指示器 */
+.wizard__steps {
+  display: flex;
+  gap: 4px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.wizard__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.wizard__step:hover {
+  background: var(--bg-hover);
+}
+
+.wizard__step--active {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.wizard__step--completed {
+  color: var(--ok);
+}
+
+.wizard__step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.wizard__step--active .wizard__step-number {
+  background: var(--accent);
+  color: white;
+}
+
+.wizard__step--completed .wizard__step-number {
+  background: var(--ok);
+  color: white;
+}
+
+/* 内容区 */
+.wizard__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* 底部按钮 */
+.wizard__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.wizard__footer-right {
+  display: flex;
+  gap: 8px;
+}
+
+.wizard__btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wizard__btn--primary {
+  background: var(--accent);
+  color: white;
+}
+
+.wizard__btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.wizard__btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wizard__btn--secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.wizard__btn--secondary:hover {
+  background: var(--bg-hover);
+}
+
+/* 表单 */
+.wizard__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 500px;
+}
+
+.wizard__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wizard__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.wizard__required {
+  color: var(--danger);
+  margin-left: 2px;
+}
+
+.wizard__input,
+.wizard__select,
+.wizard__textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.15s;
+}
+
+.wizard__input:focus,
+.wizard__select:focus,
+.wizard__textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.wizard__textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.wizard__hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.wizard__error {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.wizard__field--error .wizard__input,
+.wizard__field--error .wizard__select {
+  border-color: var(--danger);
+}
+
+/* Emoji 选择器 */
+.wizard__emoji-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wizard__emoji {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wizard__emoji:hover {
+  border-color: var(--accent);
+}
+
+.wizard__emoji--selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+/* 滑块 */
+.wizard__slider-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wizard__slider {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+}
+
+.wizard__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.wizard__slider-value {
+  min-width: 32px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* 模板选择 */
+.wizard__template-step {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wizard__categories {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wizard__category {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: none;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wizard__category:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.wizard__category--active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.wizard__templates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.wizard__template-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.wizard__template-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.wizard__template-card--blank {
+  border-style: dashed;
+}
+
+.wizard__template-icon {
+  font-size: 32px;
+}
+
+.wizard__template-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.wizard__template-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* 通道选择 */
+.wizard__channel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.wizard__channel-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wizard__channel-card:hover {
+  border-color: var(--accent);
+}
+
+.wizard__channel-card--selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.wizard__channel-icon {
+  font-size: 28px;
+}
+
+.wizard__channel-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* 角色选择 */
+.wizard__role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.wizard__role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.wizard__role-card:hover {
+  border-color: var(--accent);
+}
+
+.wizard__role-card--selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.wizard__role-icon {
+  font-size: 24px;
+}
+
+.wizard__role-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.wizard__role-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* 预览 */
+.wizard__review {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 500px;
+}
+
+.wizard__review-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.wizard__review-emoji {
+  font-size: 48px;
+}
+
+.wizard__review-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.wizard__review-id {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.wizard__review-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wizard__review-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.wizard__review-value {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.wizard__review-value--pre {
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* 文档链接 */
+.wizard__doc-link {
+  margin-bottom: 8px;
+}
+
+.wizard__doc-link a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.wizard__doc-link a:hover {
+  text-decoration: underline;
+}
+
+/* 模板列表 */
+.wizard__templates-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.wizard__templates-section h4 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.wizard__template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wizard__template-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+}
+
+.wizard__template-item strong {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.wizard__template-item span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* 向导错误提示 */
+.wizard__error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--danger-bg, #fee);
+  border: 1px solid var(--danger, #e55);
+  border-radius: var(--radius-md);
+  color: var(--danger, #c33);
+  font-size: 14px;
+}
+
+.wizard__error-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--danger, #c33);
+  cursor: pointer;
+  padding: 0 4px;
+}

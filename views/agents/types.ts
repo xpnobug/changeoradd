@@ -13,7 +13,7 @@ import type {
   GatewayAgentRow,
 } from "../../../ui/types";
 import type { CronFormState } from "../../../ui/ui-types";
-import type { AgentPanel, GlobalPanel, ConfigSnapshot } from "../../types/agents-config";
+import type { AgentStatus, AgentGroup } from "../../components/agent/agent-sidebar";
 import type { ProviderFormState } from "../../components/providers-content";
 import type {
   ToolsConfig,
@@ -21,7 +21,7 @@ import type {
   ToolPolicyConfig,
   SessionsListResult as AgentSessionsListResult,
 } from "../../controllers/model-config";
-import type { ProviderConfig, GatewayConfig, AgentDefaults } from "../model-config";
+import type { AgentPanel, GlobalPanel, ConfigSnapshot } from "../../types/agents-config";
 import type { ChannelsConfigData } from "../../types/channel-config";
 import type {
   SkillStatusReport,
@@ -37,6 +37,21 @@ import type {
   EditableSkillSource,
   SkillEditorMode,
 } from "../../types/skills-config";
+import type { ProviderConfig, GatewayConfig, AgentDefaults } from "../model-config";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Agent 向导数据类型 / Agent Wizard Data Type
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type AgentWizardData = {
+  id: string;
+  displayName?: string;
+  emoji?: string;
+  model: string;
+  systemPrompt?: string;
+  temperature?: number;
+  workspace?: string;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Props 类型定义 / Props Type Definition
@@ -64,6 +79,15 @@ export type AgentsConfigProps = {
 
   // 连接状态 / Connection state
   connected?: boolean;
+
+  // Agent 侧边栏状态 / Agent sidebar state
+  sidebarSearchQuery?: string;
+  sidebarOpenMenuId?: string | null;
+  sidebarMenuTop?: number | null;
+  sidebarMenuRight?: number | null;
+  sidebarAgentStatusById?: Record<string, AgentStatus>;
+  sidebarGroups?: AgentGroup[];
+  sidebarCollapsedGroups?: Set<string>;
 
   // Agent Identity 数据 / Agent identity data
   agentIdentity: AgentIdentityResult | null;
@@ -168,6 +192,20 @@ export type AgentsConfigProps = {
   onGlobalPanelChange: (panel: GlobalPanel | null) => void;
   onRefresh: () => void;
   onSetDefault?: (agentId: string) => void;
+
+  // 侧边栏回调 / Sidebar callbacks
+  onSidebarSearchChange?: (query: string) => void;
+  onSidebarToggleMenu?: (agentId: string | null, top?: number, right?: number) => void;
+  onSidebarToggleGroup?: (groupId: string) => void;
+  onAgentDuplicate?: (agentId: string) => void;
+  onAgentExport?: (agentId: string) => void;
+  onAgentDelete?: (agentId: string) => void;
+  onCreateAgent?: () => void;
+
+  // Agent 向导 / Agent wizard
+  showAgentWizard?: boolean;
+  onAgentWizardComplete?: (data: AgentWizardData) => void;
+  onAgentWizardCancel?: () => void;
 
   // 配置回调 / Config callbacks
   onConfigReload: () => void;

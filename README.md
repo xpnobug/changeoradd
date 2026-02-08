@@ -1,5 +1,20 @@
 # OpenClaw 中文配置 UI 模块
 
+## 安装
+不想手动安装可以直接使用命令安装
+```bash
+npm install -g @agent-our/openclaw
+```
+
+## 使用
+
+启动 Gateway：
+
+```bash
+openclaw gateway start
+```
+
+
 > 自包含的中文可视化配置界面，解决配置繁琐和权限安全问题。
 
 ## 界面预览
@@ -45,6 +60,43 @@
 | **Permissions** | 命令执行权限和工具权限管理 |
 | **Skills** | 技能管理和配置 |
 | **Cron** | 定时任务管理 |
+
+---
+
+## 📚 文档导航
+
+### 快速开始
+- [项目说明](README.md) - 本文档
+- [集成指南](docs/integration-guide.md) - 如何集成到主 UI
+- [部署指南](docs/DEPLOYMENT.md) - 本地、生产、Docker 部署
+
+### 架构设计
+- [技术架构](docs/ARCHITECTURE.md) - 分层架构、技术栈、数据流
+- [数据模型](docs/DATA_MODEL.md) - 状态管理、RPC 通信、缓存策略
+- [组件库](docs/COMPONENT_LIBRARY.md) - 设计系统、组件分类、API 规范
+
+### 开发指南
+- [代码度量](docs/CODE_METRICS.md) - 代码规模、文件分布、复杂度分析
+- [开发规范](docs/CONTRIBUTING.md) - 代码规范、Git 规范、测试规范
+- [测试策略](docs/TESTING.md) - 测试框架、覆盖率目标、实施计划
+- [优化建议](docs/OPTIMIZATION.md) - 已完成优化、待优化项
+
+### 用户体验
+- [UX 分析](docs/UX_ANALYSIS.md) - 用户画像、痛点分析、优化建议
+- [功能路线图](docs/ROADMAP.md) - 核心刚需、交互优化、实施计划
+
+### 运维支持
+- [部署指南](docs/DEPLOYMENT.md) - 环境要求、部署流程、监控告警
+- [故障排查](docs/TROUBLESHOOTING.md) - 常见问题、诊断流程、解决方案
+- [安全设计](docs/SECURITY.md) - 安全架构、威胁模型、最佳实践
+- [性能优化](docs/PERFORMANCE.md) - 性能瓶颈、优化策略、实施方案
+
+### 项目管理
+- [项目总结](docs/PROJECT_SUMMARY.md) - 项目概览、成就、规划
+- [更新日志](CHANGELOG.md) - 版本历史、变更记录
+- [文档索引](docs/INDEX.md) - 完整的文档导航
+
+**📖 查看 [文档索引](docs/INDEX.md) 了解所有文档**
 
 ---
 

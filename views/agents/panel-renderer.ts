@@ -5,7 +5,6 @@
 import { html, nothing } from "lit";
 import type { AgentsListResult } from "../../../ui/types";
 import type { GlobalPanel } from "../../types/agents-config";
-import { LABELS } from "../../types/agents-config";
 import type { AgentsConfigProps } from "./types";
 import {
   renderAgentOverview,
@@ -14,16 +13,20 @@ import {
   renderAgentSkills,
   renderAgentCron,
 } from "../../components/agent";
-import { renderChannelsContent } from "../../components/channels-content";
-import { renderProvidersContent } from "../../components/providers-content";
-import { renderGatewayContent } from "../../components/gateway-content";
 import { renderAgentContent } from "../../components/agent-content";
+import { renderChannelsContent } from "../../components/channels-content";
+import { renderGatewayContent } from "../../components/gateway-content";
+import { renderProvidersContent } from "../../components/providers-content";
+import { LABELS } from "../../types/agents-config";
 
 /**
  * 渲染当前激活的面板内容
  * Render current active panel content
  */
-export function renderActivePanel(props: AgentsConfigProps, agent: AgentsListResult["agents"][number]) {
+export function renderActivePanel(
+  props: AgentsConfigProps,
+  agent: AgentsListResult["agents"][number],
+) {
   const { activePanel, selectedAgentId } = props;
 
   if (!selectedAgentId) return nothing;

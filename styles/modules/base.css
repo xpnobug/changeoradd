@@ -1,0 +1,38 @@
+/* ===========================================
+   Model Config Page - 模型配置页面
+   =========================================== */
+
+/* Layout */
+.mc-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: calc(100vh - 160px);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+/* Sidebar Layout - 侧边栏布局 */
+.mc-layout--sidebar {
+  flex-direction: row;
+}
+
+/* Full Layout - 全宽布局 (agents-config) */
+.mc-layout--full {
+  flex-direction: column;
+}
+
+.mc-layout--full > * {
+  flex: 1;
+  min-height: 0;
+}
+
+.mc-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+

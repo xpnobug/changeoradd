@@ -1,0 +1,698 @@
+/* ============================================
+   定时任务 Cron 模块样式
+   ============================================ */
+
+/* 调度器状态卡片 */
+.cron-status-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+}
+
+.cron-status-card__item {
+  text-align: center;
+}
+
+.cron-status-card__label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cron-status-card__value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+.cron-status-card__value--ok {
+  color: var(--ok);
+}
+
+.cron-status-card__value--error {
+  color: var(--danger);
+}
+
+/* 提示卡片 */
+.cron-tip-card {
+  padding: 14px 18px;
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.cron-tip-card__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+
+.cron-tip-card__title svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* 可折叠提示卡片 */
+.cron-tip-card--collapsible {
+  padding: 0;
+}
+
+.cron-tip-card--collapsible > summary {
+  padding: 14px 18px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+.cron-tip-card--collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cron-tip-card--collapsible > summary svg:last-child {
+  margin-left: auto;
+  transition: transform var(--duration-normal) ease;
+}
+
+.cron-tip-card--collapsible[open] > summary svg:last-child {
+  transform: rotate(180deg);
+}
+
+.cron-tip-card--collapsible > summary:hover {
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-elevated));
+  border-radius: var(--radius-lg);
+}
+
+.cron-tip-card--collapsible[open] > summary {
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  margin-bottom: 0;
+}
+
+.cron-tip-card--collapsible .cron-tip-card__table {
+  padding: 0;
+}
+
+.cron-tip-card__content {
+  padding: 12px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cron-tip-card__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cron-tip-card__section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  margin-bottom: 4px;
+}
+
+.cron-tip-card__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cron-tip-card__table tr {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.cron-tip-card__table tr:last-child {
+  border-bottom: none;
+}
+
+.cron-tip-card__term {
+  width: 100px;
+  padding: 6px 12px 6px 0;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.cron-tip-card__def {
+  padding: 6px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cron-tip-card__def b {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* 表单区块 */
+.cron-form-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.cron-form-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cron-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* 调度类型切换 Tab */
+.cron-schedule-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-accent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.cron-schedule-tab {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  text-align: center;
+}
+
+.cron-schedule-tab:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.cron-schedule-tab--active {
+  background: var(--bg-elevated);
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 任务卡片 */
+.cron-job-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
+.cron-job-card:hover {
+  border-color: var(--border-strong);
+}
+
+.cron-job-card--selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cron-job-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+}
+
+.cron-job-card__header:hover {
+  background: var(--bg-hover);
+}
+
+.cron-job-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cron-job-card__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cron-job-card__schedule {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.cron-job-card__payload {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 400px;
+}
+
+.cron-job-card__status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.cron-job-card__chevron {
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+
+/* 状态徽章 */
+.cron-job-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cron-job-card__badge--enabled {
+  background: var(--ok-subtle);
+  color: var(--ok);
+}
+
+.cron-job-card__badge--disabled {
+  background: var(--bg-accent);
+  color: var(--muted);
+}
+
+.cron-job-card__badge--running {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  animation: cron-pulse 2s infinite;
+}
+
+@keyframes cron-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* 任务详情展开 */
+.cron-job-card__details {
+  padding: 0 20px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-accent);
+}
+
+.cron-job-card__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.cron-job-card__meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cron-job-card__meta-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cron-job-card__meta-value {
+  font-size: 13px;
+  color: var(--text);
+  word-break: break-all;
+}
+
+/* 操作按钮组 */
+.cron-job-card__actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* 运行历史 */
+.cron-runs-list {
+  max-height: 360px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.cron-run-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--duration-fast) ease;
+}
+
+.cron-run-item:last-child {
+  border-bottom: none;
+}
+
+.cron-run-item:hover {
+  background: var(--bg-hover);
+}
+
+.cron-run-item__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cron-run-item__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.cron-run-item__dot--ok {
+  background: var(--ok);
+}
+
+.cron-run-item__dot--error {
+  background: var(--danger);
+}
+
+.cron-run-item__dot--skipped {
+  background: var(--warning);
+}
+
+/* 错误横幅 */
+.cron-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--danger-subtle);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* 空状态 */
+.cron-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+}
+
+.cron-empty__icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  opacity: 0.4;
+  color: var(--muted);
+}
+
+.cron-empty__text {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+/* 确认弹窗 */
+.cron-confirm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: cron-modal-in 0.15s ease-out;
+}
+
+@keyframes cron-modal-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cron-confirm-modal__content {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  animation: cron-modal-content-in 0.2s ease-out;
+}
+
+@keyframes cron-modal-content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cron-confirm-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.cron-confirm-modal__desc {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.cron-confirm-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* 新建任务弹窗 */
+.cron-create-modal__content {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  animation: cron-modal-content-in 0.2s ease-out;
+}
+
+.cron-create-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cron-create-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cron-create-modal__title svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.cron-create-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cron-create-modal__close:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.cron-create-modal__body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cron-create-modal__footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* 任务列表容器 */
+.cron-jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .cron-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cron-status-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .cron-status-card__value {
+    font-size: 20px;
+  }
+
+  .cron-job-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .cron-job-card__status {
+    align-self: flex-end;
+  }
+
+  .cron-job-card__meta {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 12px;
+  }
+
+  .cron-job-card__meta-item {
+    min-width: 0;
+  }
+
+  .cron-job-card__meta-label {
+    font-size: 10px;
+  }
+
+  .cron-job-card__meta-value {
+    font-size: 12px;
+  }
+
+  .cron-job-card__actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .cron-job-card__actions .mc-btn {
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  /* 删除按钮单独占一行 */
+  .cron-job-card__actions .mc-btn--danger {
+    grid-column: span 2;
+  }
+
+  .cron-schedule-tabs {
+    flex-direction: column;
+  }
+}
+
+/* 亮色主题适配 */
+:root[data-theme="light"] .cron-status-card {
+  background: white;
+}
+
+:root[data-theme="light"] .cron-form-section {
+  background: white;
+}
+
+:root[data-theme="light"] .cron-job-card {
+  background: white;
+}
+
+:root[data-theme="light"] .cron-confirm-modal__content {
+  background: white;
+}
+
+:root[data-theme="light"] .cron-create-modal__content {
+  background: white;
+}
+

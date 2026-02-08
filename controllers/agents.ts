@@ -308,3 +308,138 @@ export function extractAgentsList(config: Record<string, unknown>): AgentIdentit
     default: true,
   }];
 }
+
+/**
+ * 复制 Agent 配置
+ * Duplicate agent configuration
+ */
+export function duplicateAgent(
+  state: ModelConfigState,
+  agentId: string,
+): string | null {
+  if (!state.modelConfigFullSnapshot) {
+    console.warn("[duplicateAgent] modelConfigFullSnapshot 为空");
+    return null;
+  }
+
+  const config = JSON.parse(JSON.stringify(state.modelConfigFullSnapshot)) as Record<string, unknown>;
+  const agents = (config.agents ?? {}) as Record<string, unknown>;
+  const list = (agents.list ?? []) as Array<Record<string, unknown>>;
+
+  const sourceIndex = list.findIndex((a) => a.id === agentId);
+  if (sourceIndex === -1) {
+    console.warn("[duplicateAgent] 未找到 agent:", agentId);
+    return null;
+  }
+
+  const source = list[sourceIndex];
+  const newId = `${agentId}-copy-${Date.now().toString(36)}`;
+  const newAgent = {
+    ...JSON.parse(JSON.stringify(source)),
+    id: newId,
+    name: `${source.name || agentId} (副本)`,
+  };
+  delete newAgent.default;
+
+  list.push(newAgent);
+  agents.list = list;
+  config.agents = agents;
+  state.modelConfigFullSnapshot = config;
+
+  state.modelConfigAgentsList = list.map((a) => ({
+    id: (a.id as string) ?? "",
+    name: a.name as string | undefined,
+    default: a.default as boolean | undefined,
+    workspace: a.workspace as string | undefined,
+    identity: a.identity as AgentIdentityConfig | undefined,
+    model: a.model as string | { primary?: string; fallbacks?: string[] } | undefined,
+  }));
+
+  console.log("[duplicateAgent] 已复制 agent", agentId, "为", newId);
+  return newId;
+}
+
+/**
+ * 导出 Agent 配置为 JSON
+ * Export agent configuration as JSON
+ */
+export function exportAgent(
+  state: ModelConfigState,
+  agentId: string,
+): void {
+  if (!state.modelConfigFullSnapshot) {
+    console.warn("[exportAgent] modelConfigFullSnapshot 为空");
+    return;
+  }
+
+  const config = state.modelConfigFullSnapshot as Record<string, unknown>;
+  const agents = (config.agents ?? {}) as Record<string, unknown>;
+  const list = (agents.list ?? []) as Array<Record<string, unknown>>;
+
+  const agent = list.find((a) => a.id === agentId);
+  if (!agent) {
+    console.warn("[exportAgent] 未找到 agent:", agentId);
+    return;
+  }
+
+  const exportData = JSON.parse(JSON.stringify(agent));
+  delete exportData.default;
+
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `agent-${agentId}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  console.log("[exportAgent] 已导出 agent", agentId);
+}
+
+/**
+ * 删除 Agent
+ * Delete agent
+ */
+export function deleteAgent(
+  state: ModelConfigState,
+  agentId: string,
+): boolean {
+  if (!state.modelConfigFullSnapshot) {
+    console.warn("[deleteAgent] modelConfigFullSnapshot 为空");
+    return false;
+  }
+
+  const config = JSON.parse(JSON.stringify(state.modelConfigFullSnapshot)) as Record<string, unknown>;
+  const agents = (config.agents ?? {}) as Record<string, unknown>;
+  const list = (agents.list ?? []) as Array<Record<string, unknown>>;
+
+  const index = list.findIndex((a) => a.id === agentId);
+  if (index === -1) {
+    console.warn("[deleteAgent] 未找到 agent:", agentId);
+    return false;
+  }
+
+  const wasDefault = list[index].default;
+  list.splice(index, 1);
+
+  // 如果删除的是默认 agent，将第一个设为默认
+  if (wasDefault && list.length > 0) {
+    list[0].default = true;
+  }
+
+  agents.list = list;
+  config.agents = agents;
+  state.modelConfigFullSnapshot = config;
+
+  state.modelConfigAgentsList = list.map((a) => ({
+    id: (a.id as string) ?? "",
+    name: a.name as string | undefined,
+    default: a.default as boolean | undefined,
+    workspace: a.workspace as string | undefined,
+    identity: a.identity as AgentIdentityConfig | undefined,
+    model: a.model as string | { primary?: string; fallbacks?: string[] } | undefined,
+  }));
+
+  console.log("[deleteAgent] 已删除 agent", agentId);
+  return true;
+}

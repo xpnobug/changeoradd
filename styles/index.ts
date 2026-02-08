@@ -5,6 +5,8 @@
 import { unsafeCSS } from "lit";
 import agentsConfigCss from "./agents-config.css?inline";
 import mobileCss from "./mobile.css?inline";
+import wizardCss from "./modules/wizard.css?inline";
 
 export const agentsConfigStyles = unsafeCSS(agentsConfigCss);
 export const mobileStyles = unsafeCSS(mobileCss);
+export const wizardStyles = unsafeCSS(wizardCss);

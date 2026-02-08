@@ -1,0 +1,236 @@
+/* ===========================================
+   Mobile Responsiveness - 移动端适配
+   =========================================== */
+
+@media (max-width: 992px) {
+  .config-content__header {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mc-layout {
+    margin: -12px;
+    border-radius: var(--radius-lg);
+  }
+
+  /* Stack sidebar on top on mobile */
+  .mc-layout--sidebar {
+    flex-direction: column;
+  }
+
+  .mc-main {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .mc-actions {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .mc-actions__left {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mc-actions__right {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .mc-content {
+    padding: 16px;
+  }
+
+  .mc-section__header {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+
+  .mc-form-row--2col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Skills settings grid - 2 columns on tablet */
+  .skills-settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Skills settings row - wrap on tablet */
+  .skills-settings-row {
+    gap: 16px 24px;
+  }
+
+  /* Priority info horizontal list - wrap on tablet */
+  .skills-priority-info__list--horizontal {
+    gap: 8px;
+  }
+
+  .skills-priority-info__list--horizontal li {
+    min-width: 140px;
+  }
+
+  .skills-priority-info__subtitle {
+    width: 100%;
+    margin-left: 30px;
+  }
+
+  .mc-model-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mc-model-row__main {
+    flex-direction: column;
+  }
+
+  .mc-model-row__field {
+    width: 100%;
+  }
+
+  .mc-model-row__remove {
+    align-self: flex-end;
+  }
+
+  .config-content__header {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+
+  .config-content__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .config-content__title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mc-provider-card__header {
+    padding: 12px 14px;
+  }
+
+  .mc-provider-card__content {
+    padding: 14px;
+  }
+
+  .mc-card__header {
+    padding: 14px 16px;
+  }
+
+  .mc-card__content {
+    padding: 16px;
+  }
+
+}
+
+/* ===========================================
+   Extra Small Mobile - 超小屏幕手机适配 (< 420px)
+   =========================================== */
+
+@media (max-width: 420px) {
+  /* 整体布局更紧凑 */
+  .mc-layout {
+    margin: -8px;
+    border-radius: var(--radius-md);
+  }
+
+  /* 操作栏 - 垂直堆叠 */
+  .mc-actions {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .mc-actions__left,
+  .mc-actions__right {
+    gap: 6px;
+  }
+
+  .mc-status {
+    font-size: 12px;
+  }
+
+  .mc-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .mc-btn--sm {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  /* 内容区域 */
+  .mc-content {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  /* 区块头部 */
+  .mc-section__header {
+    padding: 12px 14px;
+  }
+
+  .mc-section__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mc-section__title {
+    font-size: 14px;
+  }
+
+  .mc-section__desc {
+    font-size: 12px;
+  }
+
+  /* 卡片 */
+  .mc-card__header {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .mc-card__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mc-card__title {
+    font-size: 14px;
+  }
+
+  .mc-card__desc {
+    font-size: 12px;
+  }
+
+  .mc-card__content {
+    padding: 14px;
+  }
+
+  /* 表单元素 */
+  .mc-field__label {
+    font-size: 12px;
+  }
+
+  .mc-input {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .mc-select {
+    padding: 9px 36px 9px 12px;
+    font-size: 13px;
+  }
+
+  /* 空状态 */
+  .mc-empty {
+    padding: 32px 16px;
+    font-size: 13px;
+  }
+}
+

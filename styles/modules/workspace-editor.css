@@ -1,0 +1,540 @@
+/* ===========================================
+   Workspace Editor - 工作区文件编辑器
+   =========================================== */
+
+/* 工作区布局 / Workspace layout */
+.ws-layout {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  height: calc(100vh - 320px);
+}
+
+/* 文件列表 / File list */
+.ws-file-list {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-height: 800px;
+}
+
+:root[data-theme="light"] .ws-file-list {
+  background: white;
+}
+
+.ws-file-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-accent);
+}
+
+:root[data-theme="light"] .ws-file-list__header {
+  background: var(--bg-hover);
+}
+
+.ws-file-list__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ws-file-list__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.ws-file-list__footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-accent);
+}
+
+:root[data-theme="light"] .ws-file-list__footer {
+  background: var(--bg-hover);
+}
+
+.ws-file-list__dir-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.ws-file-list__dir-path {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+/* 文件项 / File item */
+.ws-file-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.ws-file-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.ws-file-item--active {
+  background: var(--bg-accent);
+  border-color: var(--accent);
+}
+
+.ws-file-item--missing {
+  opacity: 0.7;
+}
+
+.ws-file-item--missing:not(.ws-file-item--active) {
+  border-style: dashed;
+}
+
+.ws-file-item__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ws-file-item--active .ws-file-item__icon {
+  color: var(--accent);
+}
+
+.ws-file-item__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ws-file-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ws-file-item__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.ws-file-item__badge {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.ws-file-item__badge--new {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.ws-file-item__badge--unsaved {
+  background: var(--warning-subtle);
+  color: var(--warning);
+}
+
+.ws-file-item__desc {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.ws-file-item__meta {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+/* 编辑器 / Editor */
+.ws-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* 返回按钮 - 桌面端隐藏 / Back button - hidden on desktop */
+.ws-editor__back-btn {
+  display: none;
+}
+
+/* 文件列表包装器 / File list wrapper */
+.ws-file-list-wrapper {
+  display: contents;
+}
+
+:root[data-theme="light"] .ws-editor {
+  background: white;
+}
+
+.ws-editor__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-accent);
+}
+
+:root[data-theme="light"] .ws-editor__toolbar {
+  background: var(--bg-hover);
+}
+
+.ws-editor__toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ws-editor__toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ws-editor__filename {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ws-editor__unsaved-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warning);
+}
+
+/* 模式切换按钮组 / Mode toggle group */
+.ws-editor__mode-group {
+  display: flex;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.ws-editor__mode-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.ws-editor__mode-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.ws-editor__mode-btn--active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.ws-editor__mode-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* 编辑器面板 / Editor panels */
+.ws-editor__panels {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.ws-editor__panels--split {
+  gap: 1px;
+  background: var(--border);
+}
+
+.ws-editor__edit-panel,
+.ws-editor__preview-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg-elevated);
+}
+
+:root[data-theme="light"] .ws-editor__edit-panel,
+:root[data-theme="light"] .ws-editor__preview-panel {
+  background: white;
+}
+
+.ws-editor__textarea {
+  flex: 1;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+
+.ws-editor__textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+/* 预览面板 / Preview panel */
+.ws-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ws-preview__iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: transparent;
+}
+
+/* 空状态 / Empty state */
+.ws-editor__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px;
+  color: var(--muted);
+}
+
+.ws-editor__empty-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+.ws-editor__empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ws-editor__empty-text {
+  font-size: 14px;
+}
+
+/* 加载状态 / Loading state */
+.ws-editor__loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* 移动端适配 / Mobile responsiveness */
+@media (max-width: 992px) {
+  .ws-layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .ws-file-list {
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .ws-editor {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ws-editor__panels--split {
+    flex-direction: column;
+  }
+
+  .ws-file-list__body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .ws-file-item {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 140px;
+    margin-bottom: 0;
+  }
+
+  .ws-file-item__desc {
+    display: none;
+  }
+
+  .ws-file-item__meta {
+    display: none;
+  }
+}
+
+/* ===========================================
+   Folder Items - 文件夹项
+   =========================================== */
+
+/* 文件夹项 / Folder item */
+.ws-folder-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--bg-accent);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+:root[data-theme="light"] .ws-folder-item {
+  background: var(--bg-hover);
+}
+
+.ws-folder-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.ws-folder-item--has-active {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+
+.ws-folder-item__chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) ease;
+}
+
+.ws-folder-item__chevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ws-folder-item__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.ws-folder-item__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ws-folder-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ws-folder-item__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ws-folder-item__count {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ws-folder-item__desc {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* 缩进的文件项 / Indented file items */
+.ws-file-item--indent {
+  margin-left: 20px;
+  width: calc(100% - 20px);
+}
+
+/* 移动端适配 / Mobile responsiveness */
+@media (max-width: 768px) {
+  .ws-folder-item__desc {
+    display: none;
+  }
+
+  .ws-file-item--indent {
+    margin-left: 12px;
+    width: calc(100% - 12px);
+  }
+}
+

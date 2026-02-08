@@ -1,0 +1,165 @@
+/* ===========================================
+   Agent Identity Section - Agent 身份设置
+   =========================================== */
+
+/* Agent 身份预览 */
+.agent-identity-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-accent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+:root[data-theme="light"] .agent-identity-preview {
+  background: var(--bg-hover);
+}
+
+.agent-identity-preview__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+:root[data-theme="light"] .agent-identity-preview__avatar {
+  background: white;
+}
+
+.agent-identity-preview__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agent-identity-preview__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-identity-preview__name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.agent-identity-preview__theme {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Avatar 输入行 */
+.agent-identity-avatar-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.agent-identity-avatar-row .mc-input {
+  flex: 1;
+}
+
+/* Help Card - 帮助说明卡片 */
+.mc-help-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--bg-accent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-top: 4px;
+}
+
+:root[data-theme="light"] .mc-help-card {
+  background: var(--bg-hover);
+}
+
+.mc-help-card__icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.mc-help-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mc-help-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.mc-help-card__text {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Responsive - Agent 身份设置 */
+@media (max-width: 768px) {
+  .agent-identity-preview {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+
+  .agent-identity-preview__avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 40px;
+  }
+
+  .agent-identity-preview__name {
+    font-size: 16px;
+  }
+
+  .agent-identity-avatar-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .agent-identity-avatar-row .mc-input {
+    width: 100%;
+  }
+
+  .agent-identity-avatar-row .mc-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .agent-identity-preview {
+    padding: 14px;
+  }
+
+  .agent-identity-preview__avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+  }
+
+  .agent-identity-preview__name {
+    font-size: 15px;
+  }
+
+  .agent-identity-preview__theme {
+    font-size: 13px;
+  }
+}
+

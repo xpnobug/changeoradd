@@ -12,16 +12,9 @@
 import { LitElement, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../ui/gateway";
-import type {
-  AgentsListResult,
-  AgentIdentityResult,
-  CronJob,
-  GatewayAgentRow,
-} from "../ui/types";
+import type { AgentsListResult, AgentIdentityResult, CronJob, GatewayAgentRow } from "../ui/types";
 import type { WorkspaceFileInfo } from "./controllers/model-config";
-import { renderAgentsConfig, type AgentsConfigProps } from "./views/agents-config";
 import type { AgentPanel, GlobalPanel } from "./types/agents-config";
-
 // 导入 Cron 控制器
 import {
   loadCronJobs,
@@ -36,7 +29,6 @@ import {
   DEFAULT_CRON_FORM,
   type CronConfigState,
 } from "./controllers/cron-config";
-
 // 导入控制器函数和类型
 import {
   loadModelConfig,
@@ -77,10 +69,12 @@ import {
   updateAddProviderForm,
   confirmAddProvider,
   setDefaultAgent,
+  duplicateAgent,
+  exportAgent,
+  deleteAgent,
   createInitialModelConfigState,
   type ModelConfigState,
 } from "./controllers/model-config";
-
 import {
   loadSkillsStatus,
   saveSkillsConfig,
@@ -115,35 +109,47 @@ import {
   createInitialSkillsConfigState,
   type SkillsConfigState,
 } from "./controllers/skills-config";
+import { renderAgentsConfig, type AgentsConfigProps } from "./views/agents-config";
 
 // 内部状态类型 - 合并 ModelConfigState, SkillsConfigState 和 CronConfigState
-type InternalState = ModelConfigState & SkillsConfigState & CronConfigState & {
-  // Agent 列表
-  agentsList: AgentsListResult | null;
-  agentsLoading: boolean;
-  agentsError: string | null;
+type InternalState = ModelConfigState &
+  SkillsConfigState &
+  CronConfigState & {
+    // Agent 列表
+    agentsList: AgentsListResult | null;
+    agentsLoading: boolean;
+    agentsError: string | null;
 
-  // UI 状态
-  selectedAgentId: string | null;
-  activePanel: AgentPanel;
-  globalPanel: GlobalPanel | null;
+    // UI 状态
+    selectedAgentId: string | null;
+    activePanel: AgentPanel;
+    globalPanel: GlobalPanel | null;
 
-  // Agent Identity 状态
-  agentIdentityLoading: boolean;
-  agentIdentityError: string | null;
-  agentIdentityById: Record<string, AgentIdentityResult>;
+    // Agent 侧边栏状态
+    sidebarSearchQuery: string;
+    sidebarOpenMenuId: string | null;
+    sidebarMenuTop: number | null;
+    sidebarMenuRight: number | null;
 
-  // 文件编辑器状态
-  filesEditorMode: "edit" | "preview" | "split";
-  filesExpandedFolders: Set<string>;
-  filesMobileView: "list" | "editor";
+    // Agent Identity 状态
+    agentIdentityLoading: boolean;
+    agentIdentityError: string | null;
+    agentIdentityById: Record<string, AgentIdentityResult>;
 
-  // 新建会话状态
-  sessionCreateShow: boolean;
-  sessionCreateName: string;
-  sessionCreateModel: string | null;
-  sessionCreating: boolean;
-};
+    // 文件编辑器状态
+    filesEditorMode: "edit" | "preview" | "split";
+    filesExpandedFolders: Set<string>;
+    filesMobileView: "list" | "editor";
+
+    // 新建会话状态
+    sessionCreateShow: boolean;
+    sessionCreateName: string;
+    sessionCreateModel: string | null;
+    sessionCreating: boolean;
+
+    // Agent 向导状态
+    showAgentWizard: boolean;
+  };
 
 @customElement("openclaw-config-zh")
 export class OpenClawConfigElement extends LitElement {
@@ -189,6 +195,12 @@ export class OpenClawConfigElement extends LitElement {
       activePanel: "overview",
       globalPanel: null,
 
+      // Agent 侧边栏
+      sidebarSearchQuery: "",
+      sidebarOpenMenuId: null,
+      sidebarMenuTop: null,
+      sidebarMenuRight: null,
+
       // Agent Identity
       agentIdentityLoading: false,
       agentIdentityError: null,
@@ -204,6 +216,9 @@ export class OpenClawConfigElement extends LitElement {
       sessionCreateName: "",
       sessionCreateModel: null,
       sessionCreating: false,
+
+      // Agent 向导
+      showAgentWizard: false,
     } as InternalState;
   }
 
@@ -350,7 +365,12 @@ export class OpenClawConfigElement extends LitElement {
       const res = await this.client.request<{
         channelOrder?: string[];
         channelLabels?: Record<string, string>;
-        channelMeta?: Array<{ id: string; label: string; detailLabel: string; systemImage?: string }>;
+        channelMeta?: Array<{
+          id: string;
+          label: string;
+          detailLabel: string;
+          systemImage?: string;
+        }>;
       }>("channels.status", { probe: false, timeoutMs: 8000 });
 
       if (res) {
@@ -386,9 +406,16 @@ export class OpenClawConfigElement extends LitElement {
         <div class="agents-layout agents-layout--disconnected">
           <div class="mc-status-card">
             <div class="mc-status-card__icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
               </svg>
             </div>
             <h3 class="mc-status-card__title">等待连接</h3>
@@ -427,8 +454,15 @@ export class OpenClawConfigElement extends LitElement {
         <div class="agents-layout agents-layout--loading">
           <div class="mc-status-card">
             <div class="mc-status-card__icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M21 12a9 9 0 11-6.219-8.56"/>
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path d="M21 12a9 9 0 11-6.219-8.56" />
               </svg>
             </div>
             <h3 class="mc-status-card__title">加载中</h3>
@@ -469,29 +503,42 @@ export class OpenClawConfigElement extends LitElement {
       configDirty: hasModelConfigChanges(s),
       connected: this.connected,
 
+      // Agent 侧边栏状态
+      sidebarSearchQuery: s.sidebarSearchQuery,
+      sidebarOpenMenuId: s.sidebarOpenMenuId,
+      sidebarMenuTop: s.sidebarMenuTop,
+      sidebarMenuRight: s.sidebarMenuRight,
+
       // Agent Identity
-      agentIdentity: s.selectedAgentId ? s.agentIdentityById[s.selectedAgentId] ?? null : null,
+      agentIdentity: s.selectedAgentId ? (s.agentIdentityById[s.selectedAgentId] ?? null) : null,
       agentIdentityLoading: s.agentIdentityLoading,
       agentIdentityError: s.agentIdentityError,
       agentIdentityById: s.agentIdentityById,
 
       // 文件面板 - 直接使用当前状态（已转换为 UI 格式）
-      agentFilesList: s.workspaceAgentId && s.workspaceFiles ? {
-        agentId: s.workspaceAgentId,
-        workspace: s.workspaceDir ?? "",
-        files: (s.workspaceFiles ?? []).map((f: WorkspaceFileInfo) => ({
-          name: f.name,
-          path: f.path ?? f.name,
-          missing: !f.exists,
-          size: f.size,
-          updatedAtMs: f.modifiedAt,
-        })),
-      } : null,
+      agentFilesList:
+        s.workspaceAgentId && s.workspaceFiles
+          ? {
+              agentId: s.workspaceAgentId,
+              workspace: s.workspaceDir ?? "",
+              files: (s.workspaceFiles ?? []).map((f: WorkspaceFileInfo) => ({
+                name: f.name,
+                path: f.path ?? f.name,
+                missing: !f.exists,
+                size: f.size,
+                updatedAtMs: f.modifiedAt,
+              })),
+            }
+          : null,
       agentFilesLoading: s.workspaceLoading,
       agentFilesError: s.workspaceError,
       agentFileActive: s.workspaceSelectedFile,
-      agentFileContents: s.workspaceSelectedFile ? { [s.workspaceSelectedFile]: s.workspaceOriginalContent } : {},
-      agentFileDrafts: s.workspaceSelectedFile ? { [s.workspaceSelectedFile]: s.workspaceEditorContent } : {},
+      agentFileContents: s.workspaceSelectedFile
+        ? { [s.workspaceSelectedFile]: s.workspaceOriginalContent }
+        : {},
+      agentFileDrafts: s.workspaceSelectedFile
+        ? { [s.workspaceSelectedFile]: s.workspaceEditorContent }
+        : {},
       agentFileSaving: s.workspaceSaving,
       filesEditorMode: s.filesEditorMode,
       filesExpandedFolders: s.filesExpandedFolders,
@@ -575,7 +622,10 @@ export class OpenClawConfigElement extends LitElement {
       cronDefaultAgentId: s.agentsList?.defaultId ?? "",
       cronChannels: Object.keys(s.modelConfigChannelsConfig ?? {}),
       cronChannelLabels: Object.fromEntries(
-        Object.entries(s.modelConfigChannelsConfig ?? {}).map(([k, v]: [string, any]) => [k, v?.label ?? k])
+        Object.entries(s.modelConfigChannelsConfig ?? {}).map(([k, v]: [string, any]) => [
+          k,
+          v?.label ?? k,
+        ]),
       ),
       cronChannelMeta: s.cronChannelMeta,
       cronRunsJobId: s.cronRunsJobId,
@@ -667,10 +717,252 @@ export class OpenClawConfigElement extends LitElement {
         update();
       },
 
+      // 侧边栏回调
+      onSidebarSearchChange: (query) => {
+        s.sidebarSearchQuery = query;
+        update();
+      },
+      onSidebarToggleMenu: (agentId, top, right) => {
+        s.sidebarOpenMenuId = agentId;
+        s.sidebarMenuTop = top ?? null;
+        s.sidebarMenuRight = right ?? null;
+        update();
+      },
+      onAgentDuplicate: (agentId) => {
+        const newId = duplicateAgent(s, agentId);
+        s.sidebarOpenMenuId = null;
+        if (newId) {
+          s.selectedAgentId = newId;
+          saveModelConfig(s).then(update);
+        } else {
+          update();
+        }
+      },
+      onAgentExport: (agentId) => {
+        exportAgent(s, agentId);
+        s.sidebarOpenMenuId = null;
+        update();
+      },
+      onAgentDelete: (agentId) => {
+        if (!confirm(`确定要删除 Agent "${agentId}" 吗？`)) return;
+        const deleted = deleteAgent(s, agentId);
+        s.sidebarOpenMenuId = null;
+        if (deleted) {
+          if (s.selectedAgentId === agentId) {
+            s.selectedAgentId = s.modelConfigAgentsList[0]?.id ?? null;
+          }
+          saveModelConfig(s).then(update);
+        } else {
+          update();
+        }
+      },
+
+      // Agent 向导
+      showAgentWizard: s.showAgentWizard,
+      onCreateAgent: () => {
+        s.showAgentWizard = true;
+        update();
+      },
+      onAgentWizardComplete: (data) => {
+        // 如果是刷新请求，只触发更新
+        if ((data as any)._refresh) {
+          update();
+          return;
+        }
+
+        // 创建新 Agent 配置
+        const newAgent = {
+          id: data.id,
+          name: data.displayName || data.id,
+          workspace: data.workspace || `agents/${data.id}`,
+        };
+
+        // 更新配置快照（正确方式）
+        if (s.modelConfigFullSnapshot) {
+          const config = JSON.parse(JSON.stringify(s.modelConfigFullSnapshot)) as Record<
+            string,
+            unknown
+          >;
+          const agents = (config.agents ?? {}) as Record<string, unknown>;
+          const list = (agents.list ?? []) as Array<Record<string, unknown>>;
+          list.push(newAgent);
+          agents.list = list;
+          config.agents = agents;
+          s.modelConfigFullSnapshot = config;
+
+          // 同步更新 agentsList
+          s.modelConfigAgentsList = list.map((a) => ({
+            id: (a.id as string) ?? "",
+            name: a.name as string | undefined,
+            default: a.default as boolean | undefined,
+            workspace: a.workspace as string | undefined,
+          })) as GatewayAgentRow[];
+        }
+
+        s.selectedAgentId = data.id;
+
+        // 保存配置并创建工作区文件
+        saveModelConfig(s)
+          .then(async () => {
+            // 创建工作区文件
+            let fileErrors: string[] = [];
+            if (s.client && s.connected) {
+              const agentId = data.id;
+              const displayName = data.displayName || data.id;
+              const emoji = data.emoji || "🤖";
+              const systemPrompt = data.systemPrompt || "";
+
+              const files = [
+                {
+                  name: "IDENTITY.md",
+                  content: `# IDENTITY.md - 身份标识
+
+- **Name:** ${displayName}
+- **Creature:** AI Agent
+- **Vibe:** 专业、友好
+- **Emoji:** ${emoji}
+- **Specialty:** 通用助手
+`,
+                },
+                {
+                  name: "SOUL.md",
+                  content: systemPrompt
+                    ? `# SOUL.md - 灵魂
+
+${systemPrompt}
+`
+                    : `# SOUL.md - 灵魂
+
+*我是 ${displayName}，一个 AI 助手。*
+
+## 核心身份
+
+友好、专业的 AI 助手。
+
+## 工作原则
+
+- 准确理解用户意图
+- 提供有价值的回答
+- 语言简洁清晰
+`,
+                },
+                {
+                  name: "AGENTS.md",
+                  content: `# AGENTS.md - ${displayName}
+
+## 身份
+
+我是 ${displayName}。
+
+## 工作流程
+
+1. 分析任务需求
+2. 制定实现方案
+3. 执行并验证
+
+## 工具使用
+
+- \`read\`: 阅读文件
+- \`exec\`: 运行命令
+- \`write\`: 创建文件
+- \`edit\`: 修改文件
+
+## 完成任务后
+
+- 汇报完成情况
+- 列出修改的文件
+- 说明如何验证
+`,
+                },
+                {
+                  name: "TOOLS.md",
+                  content: `# TOOLS.md - 工具配置
+
+## 常用命令
+
+\`\`\`bash
+# 示例命令
+ls -la
+\`\`\`
+
+## 项目路径
+
+（待记录具体项目路径）
+`,
+                },
+                {
+                  name: "USER.md",
+                  content: `# USER.md - 关于用户
+
+- **Name:** 用户
+- **What to call them:** 你
+- **Timezone:** Asia/Shanghai
+- **Notes:**
+`,
+                },
+                {
+                  name: "MEMORY.md",
+                  content: `# MEMORY.md - 长期记忆
+
+## 项目经验
+
+（待记录）
+
+## 技术偏好
+
+（待记录）
+
+## 教训与经验
+
+（待记录）
+`,
+                },
+              ];
+
+              for (const file of files) {
+                try {
+                  await s.client.request("workspace.file.write", {
+                    agentId,
+                    fileName: file.name,
+                    content: file.content,
+                  });
+                } catch (err) {
+                  console.warn(`[createAgent] 创建 ${file.name} 失败:`, err);
+                  fileErrors.push(file.name);
+                }
+              }
+            }
+
+            // 完成创建
+            s.showAgentWizard = false;
+            if (fileErrors.length > 0) {
+              s.lastError = `Agent 已创建，但以下文件创建失败: ${fileErrors.join(", ")}`;
+            }
+            update();
+          })
+          .catch((err) => {
+            // 保存配置失败，通知向导显示错误
+            console.error("[createAgent] 保存配置失败:", err);
+            s.lastError = `创建 Agent 失败: ${String(err)}`;
+            s.showAgentWizard = false;
+            update();
+          });
+      },
+      onAgentWizardCancel: () => {
+        s.showAgentWizard = false;
+        update();
+      },
+
       // 配置回调
-      onConfigReload: () => { loadModelConfig(s).then(update); },
-      onConfigSave: () => { saveModelConfig(s).then(update); },
-      onConfigApply: () => { applyModelConfig(s).then(update); },
+      onConfigReload: () => {
+        loadModelConfig(s).then(update);
+      },
+      onConfigSave: () => {
+        saveModelConfig(s).then(update);
+      },
+      onConfigApply: () => {
+        applyModelConfig(s).then(update);
+      },
 
       // 模型回调
       onModelChange: (agentId, modelId) => {
@@ -683,15 +975,40 @@ export class OpenClawConfigElement extends LitElement {
       },
 
       // 工具回调
-      onToolsToggleExpanded: () => { toggleToolsExpanded(s); update(); },
-      onToolsUpdateGlobal: (field, value) => { updateGlobalToolsConfig(s, field, value); update(); },
-      onToolsUpdateAgent: (agentId, field, value) => { updateAgentToolsConfig(s, agentId, field, value); update(); },
-      onToolsAddGlobalDeny: (entry) => { addGlobalToolsDenyEntry(s, entry); update(); },
-      onToolsRemoveGlobalDeny: (entry) => { removeGlobalToolsDenyEntry(s, entry); update(); },
-      onToolsAddAgentDeny: (agentId, entry) => { addAgentToolsDenyEntry(s, agentId, entry); update(); },
-      onToolsRemoveAgentDeny: (agentId, entry) => { removeAgentToolsDenyEntry(s, agentId, entry); update(); },
-      onToolsReload: () => { loadPermissions(s, { kind: "gateway" }).then(update); },
-      onToolsSave: () => { savePermissions(s, { kind: "gateway" }).then(update); },
+      onToolsToggleExpanded: () => {
+        toggleToolsExpanded(s);
+        update();
+      },
+      onToolsUpdateGlobal: (field, value) => {
+        updateGlobalToolsConfig(s, field, value);
+        update();
+      },
+      onToolsUpdateAgent: (agentId, field, value) => {
+        updateAgentToolsConfig(s, agentId, field, value);
+        update();
+      },
+      onToolsAddGlobalDeny: (entry) => {
+        addGlobalToolsDenyEntry(s, entry);
+        update();
+      },
+      onToolsRemoveGlobalDeny: (entry) => {
+        removeGlobalToolsDenyEntry(s, entry);
+        update();
+      },
+      onToolsAddAgentDeny: (agentId, entry) => {
+        addAgentToolsDenyEntry(s, agentId, entry);
+        update();
+      },
+      onToolsRemoveAgentDeny: (agentId, entry) => {
+        removeAgentToolsDenyEntry(s, agentId, entry);
+        update();
+      },
+      onToolsReload: () => {
+        loadPermissions(s, { kind: "gateway" }).then(update);
+      },
+      onToolsSave: () => {
+        savePermissions(s, { kind: "gateway" }).then(update);
+      },
 
       // 文件回调
       onLoadFiles: (agentId) => {
@@ -714,7 +1031,10 @@ export class OpenClawConfigElement extends LitElement {
       onFileSave: (_name) => {
         saveWorkspaceFile(s).then(update);
       },
-      onFilesEditorModeChange: (mode) => { s.filesEditorMode = mode; update(); },
+      onFilesEditorModeChange: (mode) => {
+        s.filesEditorMode = mode;
+        update();
+      },
       onFilesFolderToggle: (folder) => {
         const next = new Set(s.filesExpandedFolders);
         if (next.has(folder)) next.delete(folder);
@@ -722,70 +1042,211 @@ export class OpenClawConfigElement extends LitElement {
         s.filesExpandedFolders = next;
         update();
       },
-      onFileCreate: (fileName) => { createWorkspaceFile(s, fileName); update(); },
-      onFilesMobileBack: () => { s.filesMobileView = "list"; update(); },
+      onFileCreate: (fileName) => {
+        createWorkspaceFile(s, fileName);
+        update();
+      },
+      onFilesMobileBack: () => {
+        s.filesMobileView = "list";
+        update();
+      },
 
       // 技能回调
-      onSkillsRefresh: () => { loadSkillsStatus(s).then(update); },
-      onSkillsSave: () => { saveSkillsConfig(s).then(update); },
-      onSkillsFilterChange: (filter) => { s.skillsConfigFilter = filter; update(); },
-      onSkillsSourceFilterChange: (source) => { s.skillsConfigSourceFilter = source; update(); },
-      onSkillsStatusFilterChange: (status) => { s.skillsConfigStatusFilter = status; update(); },
-      onSkillsGroupToggle: (group) => { toggleSkillsGroup(s, group); update(); },
-      onSkillsSkillSelect: (skillKey) => { s.skillsConfigSelectedSkill = skillKey; update(); },
-      onSkillsSkillToggle: (skillKey, enabled) => { updateSkillEnabled(s, skillKey, enabled); update(); },
-      onSkillsApiKeyChange: (skillKey, apiKey) => { updateSkillApiKeyEdit(s, skillKey, apiKey); update(); },
-      onSkillsApiKeySave: (skillKey) => { saveSkillApiKey(s, skillKey).then(update); },
-      onSkillsAllowlistModeChange: (mode) => { setAllowlistMode(s, mode); update(); },
-      onSkillsAllowlistToggle: (skillKey, inList) => { toggleAllowlistEntry(s, skillKey, inList); update(); },
-      onSkillsInstall: (skillKey, name, installId) => { installSkillDependency(s, skillKey, name, installId).then(update); },
-      onSkillsGlobalSettingChange: (field, value) => { updateGlobalSetting(s, field, value); update(); },
-      onSkillsEnvChange: (skillKey, envKey, value) => { updateSkillEnv(s, skillKey, envKey, value); update(); },
-      onSkillsEnvRemove: (skillKey, envKey) => { removeSkillEnv(s, skillKey, envKey); update(); },
-      onSkillsConfigChange: (skillKey, config) => { updateSkillConfig(s, skillKey, config); update(); },
-      onSkillsExtraDirsChange: (dirs) => { updateExtraDirs(s, dirs); update(); },
-      onSkillsEditorOpen: (skillKey, skillName, source) => { openSkillEditor(s, skillKey, skillName, source).then(update); },
-      onSkillsEditorClose: () => { closeSkillEditor(s); update(); },
-      onSkillsEditorContentChange: (content) => { updateEditorContent(s, content); update(); },
-      onSkillsEditorModeChange: (mode) => { updateEditorMode(s, mode); update(); },
-      onSkillsEditorSave: () => { saveSkillFile(s).then(update); },
-      onSkillsCreateOpen: (source) => { openCreateSkill(s, source); update(); },
-      onSkillsCreateClose: () => { closeCreateSkill(s); update(); },
-      onSkillsCreateNameChange: (name) => { updateCreateSkillName(s, name); update(); },
-      onSkillsCreateSourceChange: (source) => { updateCreateSkillSource(s, source); update(); },
-      onSkillsCreateConfirm: () => { confirmCreateSkill(s).then(update); },
-      onSkillsDeleteOpen: (skillKey, skillName, source) => { openDeleteSkill(s, skillKey, skillName, source); update(); },
-      onSkillsDeleteClose: () => { closeDeleteSkill(s); update(); },
-      onSkillsDeleteConfirm: () => { confirmDeleteSkill(s).then(update); },
-      onSkillsPreviewOpen: (skillKey, skillName) => { openSkillPreview(s, skillKey, skillName).then(update); },
-      onSkillsPreviewClose: () => { closeSkillPreview(s); update(); },
+      onSkillsRefresh: () => {
+        loadSkillsStatus(s).then(update);
+      },
+      onSkillsSave: () => {
+        saveSkillsConfig(s).then(update);
+      },
+      onSkillsFilterChange: (filter) => {
+        s.skillsConfigFilter = filter;
+        update();
+      },
+      onSkillsSourceFilterChange: (source) => {
+        s.skillsConfigSourceFilter = source;
+        update();
+      },
+      onSkillsStatusFilterChange: (status) => {
+        s.skillsConfigStatusFilter = status;
+        update();
+      },
+      onSkillsGroupToggle: (group) => {
+        toggleSkillsGroup(s, group);
+        update();
+      },
+      onSkillsSkillSelect: (skillKey) => {
+        s.skillsConfigSelectedSkill = skillKey;
+        update();
+      },
+      onSkillsSkillToggle: (skillKey, enabled) => {
+        updateSkillEnabled(s, skillKey, enabled);
+        update();
+      },
+      onSkillsApiKeyChange: (skillKey, apiKey) => {
+        updateSkillApiKeyEdit(s, skillKey, apiKey);
+        update();
+      },
+      onSkillsApiKeySave: (skillKey) => {
+        saveSkillApiKey(s, skillKey).then(update);
+      },
+      onSkillsAllowlistModeChange: (mode) => {
+        setAllowlistMode(s, mode);
+        update();
+      },
+      onSkillsAllowlistToggle: (skillKey, inList) => {
+        toggleAllowlistEntry(s, skillKey, inList);
+        update();
+      },
+      onSkillsInstall: (skillKey, name, installId) => {
+        installSkillDependency(s, skillKey, name, installId).then(update);
+      },
+      onSkillsGlobalSettingChange: (field, value) => {
+        updateGlobalSetting(s, field, value);
+        update();
+      },
+      onSkillsEnvChange: (skillKey, envKey, value) => {
+        updateSkillEnv(s, skillKey, envKey, value);
+        update();
+      },
+      onSkillsEnvRemove: (skillKey, envKey) => {
+        removeSkillEnv(s, skillKey, envKey);
+        update();
+      },
+      onSkillsConfigChange: (skillKey, config) => {
+        updateSkillConfig(s, skillKey, config);
+        update();
+      },
+      onSkillsExtraDirsChange: (dirs) => {
+        updateExtraDirs(s, dirs);
+        update();
+      },
+      onSkillsEditorOpen: (skillKey, skillName, source) => {
+        openSkillEditor(s, skillKey, skillName, source).then(update);
+      },
+      onSkillsEditorClose: () => {
+        closeSkillEditor(s);
+        update();
+      },
+      onSkillsEditorContentChange: (content) => {
+        updateEditorContent(s, content);
+        update();
+      },
+      onSkillsEditorModeChange: (mode) => {
+        updateEditorMode(s, mode);
+        update();
+      },
+      onSkillsEditorSave: () => {
+        saveSkillFile(s).then(update);
+      },
+      onSkillsCreateOpen: (source) => {
+        openCreateSkill(s, source);
+        update();
+      },
+      onSkillsCreateClose: () => {
+        closeCreateSkill(s);
+        update();
+      },
+      onSkillsCreateNameChange: (name) => {
+        updateCreateSkillName(s, name);
+        update();
+      },
+      onSkillsCreateSourceChange: (source) => {
+        updateCreateSkillSource(s, source);
+        update();
+      },
+      onSkillsCreateConfirm: () => {
+        confirmCreateSkill(s).then(update);
+      },
+      onSkillsDeleteOpen: (skillKey, skillName, source) => {
+        openDeleteSkill(s, skillKey, skillName, source);
+        update();
+      },
+      onSkillsDeleteClose: () => {
+        closeDeleteSkill(s);
+        update();
+      },
+      onSkillsDeleteConfirm: () => {
+        confirmDeleteSkill(s).then(update);
+      },
+      onSkillsPreviewOpen: (skillKey, skillName) => {
+        openSkillPreview(s, skillKey, skillName).then(update);
+      },
+      onSkillsPreviewClose: () => {
+        closeSkillPreview(s);
+        update();
+      },
 
       // 供应商回调
-      onProviderToggle: (key) => { toggleProviderExpanded(s, key); update(); },
-      onProviderAdd: () => { addProvider(s); update(); },
-      onProviderRemove: (key) => { removeProvider(s, key); update(); },
-      onProviderRename: (oldKey, newKey) => { renameProvider(s, oldKey, newKey); update(); },
-      onProviderUpdate: (key, field, value) => { updateProviderField(s, key, field, value); update(); },
-      onModelAdd: (providerKey) => { addModel(s, providerKey); update(); },
-      onModelRemove: (providerKey, modelIndex) => { removeModel(s, providerKey, modelIndex); update(); },
-      onModelUpdate: (providerKey, modelIndex, field, value) => { updateModelField(s, providerKey, modelIndex, field, value); update(); },
-      onProviderShowAddModal: (show) => { showAddProviderModal(s, show); update(); },
-      onProviderAddFormChange: (patch) => { updateAddProviderForm(s, patch); update(); },
-      onProviderAddConfirm: () => { confirmAddProvider(s); update(); },
+      onProviderToggle: (key) => {
+        toggleProviderExpanded(s, key);
+        update();
+      },
+      onProviderAdd: () => {
+        addProvider(s);
+        update();
+      },
+      onProviderRemove: (key) => {
+        removeProvider(s, key);
+        update();
+      },
+      onProviderRename: (oldKey, newKey) => {
+        renameProvider(s, oldKey, newKey);
+        update();
+      },
+      onProviderUpdate: (key, field, value) => {
+        updateProviderField(s, key, field, value);
+        update();
+      },
+      onModelAdd: (providerKey) => {
+        addModel(s, providerKey);
+        update();
+      },
+      onModelRemove: (providerKey, modelIndex) => {
+        removeModel(s, providerKey, modelIndex);
+        update();
+      },
+      onModelUpdate: (providerKey, modelIndex, field, value) => {
+        updateModelField(s, providerKey, modelIndex, field, value);
+        update();
+      },
+      onProviderShowAddModal: (show) => {
+        showAddProviderModal(s, show);
+        update();
+      },
+      onProviderAddFormChange: (patch) => {
+        updateAddProviderForm(s, patch);
+        update();
+      },
+      onProviderAddConfirm: () => {
+        confirmAddProvider(s);
+        update();
+      },
 
       // Gateway 回调
-      onGatewayUpdate: (path, value) => { updateGatewayConfig(s, path, value); update(); },
+      onGatewayUpdate: (path, value) => {
+        updateGatewayConfig(s, path, value);
+        update();
+      },
 
       // Agent 默认设置回调
-      onAgentDefaultsUpdate: (path, value) => { updateAgentDefaults(s, path, value); update(); },
-      onAgentSessionsRefresh: () => { loadAgentSessions(s, s.selectedAgentId ?? undefined).then(update); },
-      onAgentSessionModelChange: (sessionKey, model) => { patchSessionModel(s, sessionKey, model, s.selectedAgentId ?? undefined).then(update); },
+      onAgentDefaultsUpdate: (path, value) => {
+        updateAgentDefaults(s, path, value);
+        update();
+      },
+      onAgentSessionsRefresh: () => {
+        loadAgentSessions(s, s.selectedAgentId ?? undefined).then(update);
+      },
+      onAgentSessionModelChange: (sessionKey, model) => {
+        patchSessionModel(s, sessionKey, model, s.selectedAgentId ?? undefined).then(update);
+      },
       onAgentSessionNavigate: (sessionKey) => {
-        this.dispatchEvent(new CustomEvent("session-navigate", {
-          detail: { sessionKey },
-          bubbles: true,
-          composed: true,
-        }));
+        this.dispatchEvent(
+          new CustomEvent("session-navigate", {
+            detail: { sessionKey },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       },
       onAgentSessionDelete: (sessionKey) => {
         deleteSession(s, sessionKey, s.selectedAgentId ?? undefined).then(update);
@@ -830,7 +1291,10 @@ export class OpenClawConfigElement extends LitElement {
       },
 
       // 通道回调
-      onChannelSelect: (channelId) => { s.modelConfigSelectedChannel = channelId; update(); },
+      onChannelSelect: (channelId) => {
+        s.modelConfigSelectedChannel = channelId;
+        update();
+      },
       onChannelConfigUpdate: (channelId, field, value) => {
         const current = s.modelConfigChannelsConfig ?? {};
         const channelConfig = JSON.parse(JSON.stringify(current[channelId] ?? {}));
@@ -849,20 +1313,26 @@ export class OpenClawConfigElement extends LitElement {
         update();
       },
       onNavigateToChannels: () => {
-        this.dispatchEvent(new CustomEvent("navigate-channels", {
-          bubbles: true,
-          composed: true,
-        }));
+        this.dispatchEvent(
+          new CustomEvent("navigate-channels", {
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      },
+      onAddChannel: () => {
+        s.showChannelWizard = true;
+        update();
       },
       onChannelsRefresh: () => {
-        Promise.all([
-          loadModelConfig(s),
-          this._loadChannelsStatus(),
-        ]).then(update);
+        Promise.all([loadModelConfig(s), this._loadChannelsStatus()]).then(update);
       },
 
       // 定时任务回调
-      onCronFormChange: (patch) => { s.cronForm = { ...s.cronForm, ...patch }; update(); },
+      onCronFormChange: (patch) => {
+        s.cronForm = { ...s.cronForm, ...patch };
+        update();
+      },
       onCronRefresh: () => this._loadCron(),
       onCronAdd: async () => {
         await addCronJob(s);
@@ -888,8 +1358,14 @@ export class OpenClawConfigElement extends LitElement {
         await loadCronRuns(s, jobId);
         update();
       },
-      onCronExpandJob: (jobId) => { s.cronExpandedJobId = jobId; update(); },
-      onCronDeleteConfirm: (jobId) => { s.cronDeleteConfirmJobId = jobId; update(); },
+      onCronExpandJob: (jobId) => {
+        s.cronExpandedJobId = jobId;
+        update();
+      },
+      onCronDeleteConfirm: (jobId) => {
+        s.cronDeleteConfirmJobId = jobId;
+        update();
+      },
       onCronShowCreateModal: (show) => {
         s.cronShowCreateModal = show;
         if (show) {

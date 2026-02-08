@@ -1,0 +1,355 @@
+/* ===========================================
+   Channels Configuration - 通道配置
+   =========================================== */
+
+/* Channels Layout - 通道布局 */
+.channels-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 400px;
+}
+
+.channels-layout__sidebar {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.channels-layout__content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Channel List - 通道列表（水平滚动） */
+.channel-list {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-accent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.channel-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.channel-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.channel-list::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+.channel-list::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+:root[data-theme="light"] .channel-list {
+  background: var(--bg-hover);
+}
+
+.channel-list__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.channel-list__item:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.channel-list__item--active {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+:root[data-theme="light"] .channel-list__item--active {
+  background: white;
+}
+
+.channel-list__item--disabled {
+  opacity: 0.6;
+}
+
+.channel-list__item--disabled .channel-list__icon {
+  color: var(--muted);
+}
+
+.channel-list__icon {
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.channel-list__icon--enabled {
+  color: var(--accent);
+}
+
+.channel-list__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.channel-list__content {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.channel-list__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.channel-list__status {
+  display: none; /* 水平模式下隐藏状态文本 */
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.channel-list__indicator {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.channel-list__item--active .channel-list__indicator {
+  color: var(--ok);
+}
+
+.channel-list__item--disabled .channel-list__indicator {
+  color: var(--danger);
+}
+
+.channel-list__indicator svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Channel Detail - 通道详情 */
+.channel-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+:root[data-theme="light"] .channel-detail {
+  background: white;
+}
+
+.channel-detail__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--bg-accent);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  min-height: 300px;
+}
+
+.channel-detail__empty-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+.channel-detail__empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.channel-detail__empty-text {
+  font-size: 14px;
+}
+
+.channel-detail__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.channel-detail__icon {
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.channel-detail__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.channel-detail__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-detail__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.channel-detail__desc {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.channel-detail__docs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.channel-detail__docs:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.channel-detail__docs svg {
+  width: 18px;
+  height: 18px;
+}
+
+.channel-detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.channel-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.channel-detail__section-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.channel-detail__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Channel Content Header - 通道内容头部 */
+.config-content--channels .config-content__header {
+  flex-wrap: wrap;
+}
+
+.config-content--channels .config-content__header .mc-btn {
+  margin-left: auto;
+}
+
+/* Responsive - 通道配置响应式 */
+@media (max-width: 768px) {
+  .channel-list__item {
+    padding: 8px 12px;
+  }
+
+  .channel-list__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .channel-detail {
+    padding: 16px;
+  }
+
+  .channel-detail__header {
+    flex-wrap: wrap;
+  }
+
+  .channel-detail__icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .channel-detail__title {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .channel-list {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .channel-list__item {
+    padding: 6px 10px;
+  }
+
+  .channel-list__icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .channel-list__indicator {
+    display: none;
+  }
+
+  .channel-detail {
+    padding: 14px;
+  }
+
+  .channel-detail__fields {
+    gap: 12px;
+  }
+}
+

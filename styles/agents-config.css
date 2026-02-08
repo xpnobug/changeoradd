@@ -2,6 +2,9 @@
    Agent Configuration - Agent 配置页面
    =========================================== */
 
+/* 导入向导样式 / Import wizard styles */
+@import "./modules/wizard.css";
+
 /* ===========================================
    Agents Layout - Agent 布局
    =========================================== */
@@ -78,9 +81,11 @@
 }
 
 @keyframes mc-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
   }
+
   50% {
     opacity: 1;
   }
@@ -139,6 +144,12 @@
   border-bottom: 1px solid var(--border);
 }
 
+.agents-sidebar__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .agents-sidebar__title {
   margin: 0;
   font-size: 15px;
@@ -167,7 +178,10 @@
   font-weight: 500;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  transition:
+    opacity 0.15s,
+    background 0.15s,
+    color 0.15s;
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -179,6 +193,48 @@
 .agents-sidebar__set-default:hover {
   background: var(--primary-subtle);
   color: var(--primary);
+}
+
+/* 搜索框 */
+.agents-sidebar__search {
+  padding: 0 12px 12px;
+  position: relative;
+}
+
+.agents-sidebar__search-input {
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.agents-sidebar__search-input::placeholder {
+  color: var(--muted);
+}
+
+.agents-sidebar__search-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.agents-sidebar__search-clear {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-75%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.agents-sidebar__search-clear:hover {
+  color: var(--text);
 }
 
 .agents-sidebar__list {
@@ -231,6 +287,209 @@
   justify-content: center;
   font-size: 18px;
   flex-shrink: 0;
+}
+
+/* 使用 .agents-sidebar__avatar 作为头像容器 */
+.agents-sidebar__avatar {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+:root[data-theme="light"] .agents-sidebar__avatar {
+  background: white;
+}
+
+/* 状态指示器 */
+.agents-sidebar__status-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-accent);
+}
+
+.agents-sidebar__status-indicator--online {
+  background: var(--ok);
+}
+
+.agents-sidebar__status-indicator--offline {
+  background: var(--muted);
+}
+
+.agents-sidebar__status-indicator--error {
+  background: var(--danger);
+}
+
+.agents-sidebar__status-indicator--idle {
+  background: var(--warning);
+}
+
+/* 更多操作按钮 */
+.agents-sidebar__more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.15s,
+    background 0.15s,
+    color 0.15s;
+  flex-shrink: 0;
+}
+
+.agents-sidebar__more-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.agents-sidebar__item:hover .agents-sidebar__more-btn {
+  opacity: 1;
+}
+
+.agents-sidebar__more-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+/* 操作菜单背景遮罩 */
+.agents-sidebar__menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+/* 操作菜单 */
+.agents-sidebar__menu {
+  position: fixed;
+  width: 140px;
+  z-index: 1000;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.agents-sidebar__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.agents-sidebar__menu-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.agents-sidebar__menu-item:hover {
+  background: var(--bg-hover);
+}
+
+.agents-sidebar__menu-item--danger {
+  color: var(--danger);
+}
+
+.agents-sidebar__menu-item--danger:hover {
+  background: var(--danger-subtle);
+}
+
+/* 分组样式 */
+.agents-sidebar__group {
+  margin-bottom: 8px;
+}
+
+.agents-sidebar__group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 8px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.agents-sidebar__group-header:hover {
+  color: var(--text);
+}
+
+.agents-sidebar__group-header--static {
+  cursor: default;
+  padding-left: 22px;
+}
+
+.agents-sidebar__group-header--static:hover {
+  color: var(--muted);
+}
+
+.agents-sidebar__group-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  transition: transform 0.15s;
+}
+
+.agents-sidebar__group-chevron svg {
+  width: 12px;
+  height: 12px;
+}
+
+.agents-sidebar__group-chevron--open {
+  transform: rotate(90deg);
+}
+
+.agents-sidebar__group-label {
+  flex: 1;
+  text-align: left;
+}
+
+.agents-sidebar__group-count {
+  padding: 1px 6px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+}
+
+.agents-sidebar__group-items {
+  padding-left: 8px;
 }
 
 :root[data-theme="light"] .agents-sidebar__item-avatar {
@@ -429,6 +688,7 @@
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1308,4 +1568,63 @@
 /* 简化：直接让所有带 actions 的卡片头部居中对齐 */
 .mc-card__header:has(.mc-card__actions) {
   align-items: center;
+}
+
+/* Agent 向导弹窗 / Agent wizard modal */
+.agents-wizard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.agents-wizard-modal {
+  width: 90%;
+  max-width: 640px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* 向导内容滚动 / Wizard content scroll */
+.agents-wizard-modal .wizard__content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* 向导底部固定 / Wizard footer fixed */
+.agents-wizard-modal .wizard__footer {
+  flex-shrink: 0;
+  background: var(--bg);
+  border-top: none;
+}
+
+/* 模板卡片紧凑布局 / Template cards compact layout */
+.agents-wizard-modal .wizard__templates {
+  gap: 8px;
+}
+
+.agents-wizard-modal .wizard__template-card {
+  padding: 14px 12px;
+  gap: 6px;
+}
+
+.agents-wizard-modal .wizard__template-icon {
+  font-size: 28px;
+}
+
+.agents-wizard-modal .wizard__template-name {
+  font-size: 13px;
 }
